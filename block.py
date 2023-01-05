@@ -1,5 +1,4 @@
 from typing import List, Iterator, Optional, ClassVar
-import uuid
 
 
 class Block:
@@ -23,6 +22,10 @@ class Block:
     @property
     def parent(self) -> Optional["Block"]:
         return self.__parent
+
+    @property
+    def id(self) -> int:
+        return self.__id
 
     def children_iter(self) -> Iterator["Block"]:
         yield from self.__children

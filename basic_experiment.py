@@ -1,15 +1,17 @@
 from node import Node
 from mining_oracle import PoWMiningOracle
-import simpy
+from network import Network
+import simpy.core
 
 
 def run_experiment() -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
-    nodes = [Node(1/10, 1) for _ in range(10)]
-    oracle = PoWMiningOracle(nodes)
-    env = simpy.Environment()  # type: ignore
+    env = simpy.core.Environment()
 
-    env.process(oracle.mine(env))
+    network = Network(header_delay=0.1, env=env)
+    nodes = [Node(1/10, 1, network) for _ in range(10)]
+    oracle = PoWMiningOracle(nodes, env)
+    env.process(oracle.run_mining())
     env.run(until=300)
 
 
