@@ -9,7 +9,10 @@ def run_experiment() -> None:
     env = simpy.core.Environment()
 
     network = Network(header_delay=0.1, env=env)
-    nodes = [Node(1/10, 1, network) for _ in range(10)]
+    nodes = [Node(mining_rate=1/10,
+                  bandwidth=2,
+                  network=network)
+             for _ in range(10)]
     oracle = PoWMiningOracle(nodes, env)
     env.process(oracle.run_mining())
     env.run(until=300)
