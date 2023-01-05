@@ -1,7 +1,8 @@
 
-from typing import Set, ClassVar, Optional
+from typing import Set, ClassVar, Optional, Generator
 from block import Block
 import network
+import simpy.events
 
 
 class Node:
@@ -24,7 +25,7 @@ class Node:
 
         # honest node behavior:
         self.__longest_header_tip: Optional[Block] = None
-        self.__longest_known_chain: Optional[Block] = None
+        self.__longest_downloaded_tip: Optional[Block] = None
 
     def receive_header(self, block: Block) -> None:
         print(f"Header: Node {self.id} learns of header {block.id}")
@@ -33,18 +34,28 @@ class Node:
         if not self.__longest_header_tip or self.__longest_header_tip.height < block.height:
             self.__longest_header_tip = block
 
-        # TODO: Adjust the download (check if download events need to be scheduled)
+        # TODO fix this. blocks are downloaded in parallel w/ full bandwidth after initial delivery.
+        if block not in self.__downloaded_blocks:
+            self.__network.schedule_download_single_block(
+                self, block, self.__bandwidth)
+
+    def finished_downloading(self, block: Block) -> None:
+        print(f"Block: Node {self.id} downloaded block {block.id}")
+        self.__downloaded_blocks.add(block)
+        if not self.__longest_downloaded_tip or block.height > self.__longest_downloaded_tip.height:
+            self.__longest_downloaded_tip = block
+        # TODO here I'd want to schedule other blocks, or readjust bandwidth
 
     def mine_block(self) -> None:
         """This method is called externally by the mining oracle."""
-        block = Block(self.__longest_known_chain)
+        block = Block(self.__longest_downloaded_tip)
         print(
             f"Mining: Node {self.id} mines block {block.id} of height {block.height}")
 
         self.__downloaded_blocks.add(block)
-        self.__longest_known_chain = block
+        self.__longest_downloaded_tip = block
         self.receive_header(block)
-        self.__network.notify_all_of_header(self, block)
+        self.__network.schedule_notify_all_of_header(self, block)
 
     def __hash__(self) -> int:
         return self.__id
