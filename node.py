@@ -34,7 +34,6 @@ class Node:
         self.__downloaded_blocks.add(block)
         self.__longest_known_chain = block
         self.receive_header(block)
-        print(f"Node {self.__id} mines block {hash(block)}")
 
     @property
     def mining_rate(self) -> float:

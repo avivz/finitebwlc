@@ -16,7 +16,6 @@ class PoWMiningOracle:
             time_to_next_block = get_time_to_next_block(
                 self.__total_mining_power)
             yield (env.timeout(time_to_next_block))
-            print(f"mining event at time {env.now}")
 
             # select miner by relative weight
             miner, = random.choices(self.__nodes, weights=self.__weights, k=1)
