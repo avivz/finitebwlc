@@ -1,11 +1,13 @@
-from typing import List, Iterator, Optional
+from typing import List, Iterator, Optional, ClassVar
+import uuid
 
 
 class Block:
-    __slots__ = ['__parent', '__children', '__height',
-                 'height', 'parent', 'children_iter']
+    __next_id: ClassVar[int] = 0
 
     def __init__(self, parent: Optional["Block"]):
+        self.__id = Block.__next_id
+        Block.__next_id += 1
         self.__parent = parent
         self.__children: List["Block"] = []
         if parent:
@@ -24,3 +26,6 @@ class Block:
 
     def children_iter(self) -> Iterator["Block"]:
         yield from self.__children
+
+    def __hash__(self) -> int:
+        return self.__id
