@@ -23,11 +23,17 @@ class Node:
         self.__longest_known_chain: Optional[Block] = None
 
     def receive_header(self, block: Block) -> None:
+        self.__known_headers.add(block)
         if not self.__longest_header_tip or self.__longest_header_tip.height < block.height:
             self.__longest_header_tip = block
+        
+        #TODO: Adjust the download (check if download events need to be scheduled)
             
 
     def mine_block(self) -> None:
         block = Block(self.__longest_known_chain)
+        self.__downloaded_blocks.add(block)
         self.__longest_known_chain = block
-        self.receive_header(block) 
+        self.receive_header(block)
+
+        #TODO: set the next mining event
