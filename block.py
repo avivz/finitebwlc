@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Iterator
 
 
 class Block:
@@ -6,6 +6,7 @@ class Block:
         self.__parent = parent
         self.__children: List["Block"] = []
         self.__height: int = 0 if parent is None else parent.__height+1
+        self.__parent.__children.append(self)
 
     @property
     def height(self) -> int:
@@ -14,3 +15,6 @@ class Block:
     @property
     def parent(self) -> "Block":
         return self.__parent
+
+    def children_iter(self) -> Iterator["Block"]:
+        yield from self.__children
