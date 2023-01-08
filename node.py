@@ -38,7 +38,7 @@ class Node:
             self.__longest_header_tip = block
 
         # reconsider what to download
-        self._select_and_start_next_download()
+        self._reconsider_next_download()
 
     def progressed_downloading(self, block: Block, fraction_downloaded: float) -> None:
         # finish off the current download process.
@@ -51,7 +51,7 @@ class Node:
             self.__downloaded_blocks.add(block)
             if not self.__longest_downloaded_chain or block.height > self.__longest_downloaded_chain.height:
                 self.__longest_downloaded_chain = block
-            self._select_and_start_next_download()
+            self._reconsider_next_download()
         else:
             # TODO handle partial downloads here. Currently partial downloads are discarded.
             # we don't start a new download here because we assume an interrupt means one was already scheduled
@@ -71,29 +71,32 @@ class Node:
             self.__longest_header_tip = block
 
         self.__network.schedule_notify_all_of_header(self, block)
-        self._select_and_start_next_download()
+        self._reconsider_next_download()
 
-    def _select_and_start_next_download(self) -> None:
-        # if we already have the longest tip, no download target. Interrupt the current process if there is one.
-        if self.__longest_header_tip is None or self.__longest_header_tip in self.__downloaded_blocks:
-            self.__download_target = None
+    def _reconsider_next_download(self) -> None:
+        # find the preferred download target:
+        preferred_download = self._find_preferred_download_target()
+
+        # if this is a new target, interrupt the old download.
+        if self.__download_target != preferred_download:
+            # interrupt the old process if it exists
             if self.__download_process:
                 self.__download_process.interrupt()
-                self.__download_process = None
-            return
 
-        # otherwise, find the next block towards the longest header chain:
+            self.__download_target = preferred_download
+            # schedule a new download.
+            if preferred_download is not None:
+                self.__download_process = self.__network.schedule_download_single_block(
+                    self, preferred_download, self.bandwidth)
+
+    def _find_preferred_download_target(self) -> Optional[Block]:
+        if self.__longest_header_tip is None or self.__longest_header_tip in self.__downloaded_blocks:
+            return None
         cur = self.__longest_header_tip
+        # travel back to a block that has a downloaded parent
         while cur.parent and cur.parent not in self.__downloaded_blocks:
             cur = cur.parent
-
-        # if this is a new target, interrupt the old download and start a new one.
-        if self.__download_target != cur:
-            self.__download_target = cur
-            if self.__download_process:
-                self.__download_process.interrupt()
-            self.__download_process = self.__network.schedule_download_single_block(
-                self, cur, self.bandwidth)
+        return cur
 
     def __hash__(self) -> int:
         return self.__id
