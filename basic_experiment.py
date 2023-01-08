@@ -14,7 +14,6 @@ def run_experiment() -> None:
                   network=network)
              for _ in range(10)]
     oracle = PoWMiningOracle(nodes, env)
-    env.process(oracle.run_mining())
     env.run(until=300)
 
 

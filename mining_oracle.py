@@ -13,6 +13,9 @@ class PoWMiningOracle:
         self.__total_mining_power = sum(self.__weights)
         self.__env = env
 
+        # start the mining events:
+        env.process(self.run_mining())
+
     def run_mining(self) -> Generator[simpy.events.Timeout, None, None]:
         while True:
             time_to_next_block = get_time_to_next_block(
