@@ -4,8 +4,6 @@ from block import Block
 import network
 import simpy.events
 
-EPS = 0.000001
-
 
 class Node:
     __next_id: ClassVar[int] = 0
@@ -32,31 +30,20 @@ class Node:
         self.__longest_header_tip: Optional[Block] = None
         self.__longest_downloaded_chain: Optional[Block] = None
 
-    def receive_header(self, block: Block) -> None:
-        print(f"Header: Node {self} learns of header {block}")
-        if not self.__longest_header_tip or self.__longest_header_tip.height < block.height:
-            self.__longest_header_tip = block
+    @property
+    def mining_rate(self) -> float:
+        return self.__mining_rate
 
-        # reconsider what to download
-        self._reconsider_next_download()
+    @property
+    def id(self) -> float:
+        return self.__id
 
-    def progressed_downloading(self, block: Block, fraction_downloaded: float) -> None:
-        # finish off the current download process.
-        self.__download_process = None
-        self.__download_target = None
+    @property
+    def bandwidth(self) -> float:
+        return self.__bandwidth
 
-        print(f"Block: Node {self} downloaded block {block}")
-        # add block to download store:
-        if abs(fraction_downloaded - 1.0) <= EPS:
-            self.__downloaded_blocks.add(block)
-            if not self.__longest_downloaded_chain or block.height > self.__longest_downloaded_chain.height:
-                self.__longest_downloaded_chain = block
-            self._reconsider_next_download()
-        else:
-            # TODO handle partial downloads here. Currently partial downloads are discarded.
-            # we don't start a new download here because we assume an interrupt means one was already scheduled
-            # this needs to be fixed if block downloads are resumed,because then a fraction can also be a completion.
-            pass
+    def __str__(self) -> str:
+        return f"Node_{self.id}"
 
     def mine_block(self) -> None:
         """This method is called externally by the mining oracle."""
@@ -71,6 +58,14 @@ class Node:
             self.__longest_header_tip = block
 
         self.__network.schedule_notify_all_of_header(self, block)
+        self._reconsider_next_download()
+
+    def receive_header(self, block: Block) -> None:
+        print(f"Header: Node {self} learns of header {block}")
+        if not self.__longest_header_tip or self.__longest_header_tip.height < block.height:
+            self.__longest_header_tip = block
+
+        # reconsider what to download
         self._reconsider_next_download()
 
     def _reconsider_next_download(self) -> None:
@@ -89,6 +84,7 @@ class Node:
                 self.__download_process = self.__network.schedule_download_single_block(
                     self, preferred_download, self.bandwidth)
 
+    # TODO: this is where the behavior of nodes changes the download rule!
     def _find_preferred_download_target(self) -> Optional[Block]:
         if self.__longest_header_tip is None or self.__longest_header_tip in self.__downloaded_blocks:
             return None
@@ -101,17 +97,23 @@ class Node:
     def __hash__(self) -> int:
         return self.__id
 
-    @property
-    def mining_rate(self) -> float:
-        return self.__mining_rate
+    def progressed_downloading(self, block: Block, fraction_downloaded: float) -> None:
+        # precision for comparissons. blocks are considered complete if this is the fraction missing.
+        EPS = 0.000001
 
-    @property
-    def id(self) -> float:
-        return self.__id
+        # finish off the current download process.
+        self.__download_process = None
+        self.__download_target = None
 
-    @property
-    def bandwidth(self) -> float:
-        return self.__bandwidth
-
-    def __str__(self) -> str:
-        return f"Node_{self.id}"
+        print(f"Block: Node {self} downloaded block {block}")
+        # add block to download store:
+        if abs(fraction_downloaded - 1.0) <= EPS:
+            self.__downloaded_blocks.add(block)
+            if not self.__longest_downloaded_chain or block.height > self.__longest_downloaded_chain.height:
+                self.__longest_downloaded_chain = block
+            self._reconsider_next_download()
+        else:
+            # TODO handle partial downloads here. Currently partial downloads are discarded.
+            # we don't start a new download here because we assume an interrupt means one was already scheduled
+            # this needs to be fixed if block downloads are resumed,because then a fraction can also be a completion.
+            pass
