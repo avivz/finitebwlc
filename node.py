@@ -25,7 +25,7 @@ class Node:
 
         # honest node behavior:
         self.__longest_header_tip: Optional[Block] = None
-        self.__longest_downloaded_tip: Optional[Block] = None
+        self.__longest_downloaded_chain: Optional[Block] = None
 
     def receive_header(self, block: Block) -> None:
         print(f"Header: Node {self.id} learns of header {block.id}")
@@ -42,18 +42,18 @@ class Node:
     def finished_downloading(self, block: Block) -> None:
         print(f"Block: Node {self.id} downloaded block {block.id}")
         self.__downloaded_blocks.add(block)
-        if not self.__longest_downloaded_tip or block.height > self.__longest_downloaded_tip.height:
-            self.__longest_downloaded_tip = block
+        if not self.__longest_downloaded_chain or block.height > self.__longest_downloaded_chain.height:
+            self.__longest_downloaded_chain = block
         # TODO here I'd want to schedule other blocks, or readjust bandwidth
 
     def mine_block(self) -> None:
         """This method is called externally by the mining oracle."""
-        block = Block(self.__longest_downloaded_tip)
+        block = Block(self.__longest_downloaded_chain)
         print(
             f"Mining: Node {self.id} mines block {block.id} of height {block.height}")
 
         self.__downloaded_blocks.add(block)
-        self.__longest_downloaded_tip = block
+        self.__longest_downloaded_chain = block
         self.receive_header(block)
         self.__network.schedule_notify_all_of_header(self, block)
 
