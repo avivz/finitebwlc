@@ -13,7 +13,7 @@ def run_experiment() -> None:
                   bandwidth=2,
                   network=network)
              for _ in range(10)]
-    oracle = PoWMiningOracle(nodes, env)
+    PoWMiningOracle(nodes, env)
     env.run(until=300)
 
 
