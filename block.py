@@ -32,3 +32,6 @@ class Block:
 
     def __hash__(self) -> int:
         return self.__id
+
+    def __str__(self) -> str:
+        return f"Block(id={self.id}, h={self.height}, parent_id={self.parent.id if self.parent else None})"

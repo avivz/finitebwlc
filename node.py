@@ -71,3 +71,6 @@ class Node:
     @property
     def bandwidth(self) -> float:
         return self.__bandwidth
+
+    def __str__(self) -> str:
+        return f"Node_{self.id}"
