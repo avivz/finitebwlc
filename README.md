@@ -18,12 +18,12 @@ In case of download rules that download towards a tip: one must decide if downlo
 
 - Do we preempt active downloads? (currently yes)  *We need to explain in the paper how this differs from the analysis*
 - Are partial block downloads saved? (currently no)
-- Do headers take time to propagate? (currently yes) 
+- Do headers take time to propagate? (currently yes)
 - How realistic is the network model? should I simulate P2P flooding, or download from a cloud? (currently downloading from cloud)
 
 ## Information to collect
 
-- Mining power wasted (time honest nodes spent mining on tips that aren't longest chain at the time of mining). This is slightly different from fraction of blocks discarded if attacker is present. 
+- Mining power wasted (time honest nodes spent mining on tips that aren't longest chain at the time of mining). This is slightly different from fraction of blocks discarded if attacker is present
 - Fraction of honest blocks in main chain
 
 ## TODOs
@@ -33,9 +33,9 @@ In case of download rules that download towards a tip: one must decide if downlo
 - Implement a PoS mining oracle
 - Collect information
 - Implement information collection from parallelized experiments
-- Plot 
+- Plots!
 
-# Plots to do:
+## Plots to do
 
 - beta (max adversary strength we are safe for) as a function of delay / bandwidth
 - draw the chain that is created
