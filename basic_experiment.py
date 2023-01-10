@@ -7,7 +7,7 @@ import cProfile
 import plotly.express as px  # type: ignore
 import pandas as pd  # type: ignore
 from block import Block
-import plotly.graph_objects as go
+import plotly.graph_objects as go  # type: ignore
 
 
 def run_experiment() -> None:
