@@ -1,21 +1,28 @@
-from typing import List, Iterator, Optional, ClassVar
+from typing import List, Iterator, Optional, ClassVar, TYPE_CHECKING
+if TYPE_CHECKING:
+    from node import Node
 
 
 class Block:
     __next_id: ClassVar[int] = 0
 
-    def __init__(self, parent: Optional["Block"], creation_time: float):
+    def __init__(self, miner: "Node", parent: Optional["Block"], creation_time: float):
         self.__id = Block.__next_id
         Block.__next_id += 1
         self.__parent = parent
         self.__children: List["Block"] = []
         self.__is_available = True
         self.__creation_time = creation_time
+        self.__miner = miner
         if parent:
             parent.__children.append(self)
             self.__height: int = parent.__height+1
         else:
             self.__height = 0
+
+    @property
+    def miner(self) -> "Node":
+        return self.__miner
 
     @property
     def is_available(self) -> bool:

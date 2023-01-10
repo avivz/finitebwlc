@@ -54,7 +54,7 @@ class Node:
 
     def mine_block(self) -> None:
         """This method is called externally by the mining oracle."""
-        block = Block(self.__longest_downloaded_chain,
+        block = Block(self, self.__longest_downloaded_chain,
                       simulation_parameters.ENV.now)
         if simulation_parameters.verbose:
             print(
