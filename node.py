@@ -8,13 +8,14 @@ import simpy.events
 class Node:
     __next_id: ClassVar[int] = 0
 
-    def __init__(self, mining_rate: float, bandwidth: float, network: network.Network) -> None:
+    def __init__(self, mining_rate: float, bandwidth: float, header_delay: float, network: network.Network) -> None:
         # set a unique id:
         self.__id = Node.__next_id
         Node.__next_id += 1
 
         self.__mining_rate = mining_rate
         self.__bandwidth = bandwidth
+        self.__header_delay = header_delay
 
         self.__downloaded_blocks: Set[Block] = set()
 
@@ -41,6 +42,10 @@ class Node:
     @property
     def bandwidth(self) -> float:
         return self.__bandwidth
+
+    @property
+    def header_delay(self) -> float:
+        return self.__header_delay
 
     def __str__(self) -> str:
         return f"Node_{self.id}"
