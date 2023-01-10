@@ -4,6 +4,7 @@ from network import Network
 import simpy.core
 import argparse
 import simulation_parameters
+import cProfile
 
 
 def run_experiment() -> None:
@@ -29,6 +30,13 @@ if __name__ == "__main__":
 
     parser.add_argument('-v', '--verbose',
                         action='store_true')  # on/off flag
+
+    parser.add_argument('-p', '--profile',
+                        action='store_true')  # on/off flag
+
     args = parser.parse_args()
     simulation_parameters.verbose = args.verbose
-    run_experiment()
+    if args.profile:
+        cProfile.run('run_experiment()')
+    else:
+        run_experiment()
