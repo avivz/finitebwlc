@@ -54,9 +54,11 @@ class Node:
 
     def mine_block(self) -> None:
         """This method is called externally by the mining oracle."""
-        block = Block(self.__longest_downloaded_chain)
+        block = Block(self.__longest_downloaded_chain,
+                      simulation_parameters.ENV.now)
         if simulation_parameters.verbose:
-            print(f"Mining: Node {self} mines block {block}")
+            print(
+                f"Mining t={simulation_parameters.ENV.now:.2f}: Node {self} mines block {block}")
 
         self.__downloaded_blocks.add(block)
         self.__longest_downloaded_chain = block
@@ -66,7 +68,8 @@ class Node:
 
     def receive_header(self, block: Block) -> None:
         if simulation_parameters.verbose:
-            print(f"Header: Node {self} learns of header {block}")
+            print(
+                f"Header t={simulation_parameters.ENV.now:.2f}: Node {self} learns of header {block}")
         if self.__download_pq.contains_element(block):
             return
         # TODO: The priority that is chosen here should be changed for other download rules
@@ -124,7 +127,7 @@ class Node:
 
         if simulation_parameters.verbose:
             print(
-                f"Download: Node {self} downloaded block {block}, fraction: {fraction_downloaded}")
+                f"Download t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {fraction_downloaded}")
 
         # add block to download store:
         if abs(fraction_downloaded - 1.0) <= EPS:
