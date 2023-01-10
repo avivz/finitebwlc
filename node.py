@@ -123,7 +123,8 @@ class Node:
         self.__download_target = None
 
         if simulation_parameters.verbose:
-            print(f"Block: Node {self} downloaded block {block}")
+            print(
+                f"Download: Node {self} downloaded block {block}, fraction: {fraction_downloaded}")
 
         # add block to download store:
         if abs(fraction_downloaded - 1.0) <= EPS:
