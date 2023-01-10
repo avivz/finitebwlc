@@ -67,6 +67,7 @@ class Node:
         print(f"Header: Node {self} learns of header {block}")
         if self.__download_pq.contains_element(block):
             return
+        # TODO: The priority that is chosen here should be changed for other download rules
         self.__download_pq.enqueue(block, block.height)
         self._reconsider_next_download()
 
@@ -89,7 +90,6 @@ class Node:
             self.__download_process = self.__network.schedule_download_single_block(
                 self, preferred_download, self.bandwidth)
 
-    # TODO: this is where the behavior of nodes changes the download rule!
     def _find_preferred_download_target(self) -> Optional[Block]:
         while self.__download_pq.size > 0:
             block = self.__download_pq.peek()
@@ -101,6 +101,11 @@ class Node:
             # travel back to a block that has a downloaded parent
             while cur.parent and cur.parent not in self.__downloaded_blocks:
                 cur = cur.parent
+
+            # if the block we want to download is discovered as unavailable, we remove the tip from further consideration (it needs to be re-anounced if it is to be considered again)
+            if not cur.is_available:
+                self.__download_pq.dequeue()
+                continue
             return cur
         return None
 

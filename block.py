@@ -9,11 +9,20 @@ class Block:
         Block.__next_id += 1
         self.__parent = parent
         self.__children: List["Block"] = []
+        self.__is_available = True
         if parent:
             parent.__children.append(self)
             self.__height: int = parent.__height+1
         else:
             self.__height = 0
+
+    @property
+    def is_available(self) -> bool:
+        return self.__is_available
+
+    @is_available.setter
+    def is_available(self, available: bool) -> None:
+        self.__is_available = available
 
     @property
     def height(self) -> int:

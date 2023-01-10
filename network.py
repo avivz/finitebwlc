@@ -29,6 +29,8 @@ class Network:
     #     node.receive_header(block)
 
     def schedule_download_single_block(self, downloader: "Node", block: Block, bandwidth: float) -> simpy.events.Process:
+        if not block.is_available:
+            raise ValueError(f"block is not available! {block}")
 
         def download_task() -> Generator[simpy.events.Event, None, None]:
             time_to_download = 1/bandwidth
