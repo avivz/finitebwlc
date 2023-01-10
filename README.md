@@ -37,3 +37,4 @@ In case of download rules that download towards a tip: Downloading now continues
 
 - beta (max adversary strength we are safe for) as a function of delay / bandwidth
 - draw the chain that is created
+- draw a time-line of actions for a node using [plotly timelines](https://plotly.com/python-api-reference/generated/plotly.express.timeline.html) or [gantt](https://plotly.com/python/gantt/)
