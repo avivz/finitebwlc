@@ -1,17 +1,20 @@
 from node import Node
 from mining_oracle import PoWMiningOracle
 from network import Network
-import simpy.core
 import argparse
 import simulation_parameters
 import cProfile
+import plotly.express as px  # type: ignore
+import pandas as pd  # type: ignore
+from block import Block
+import plotly.graph_objects as go
 
 
 def run_experiment() -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
     network = Network()
 
-    num_nodes = 100
+    num_nodes = 10
     total_block_rate = 1  # blocks per sec
     nodes = [Node(mining_rate=total_block_rate/num_nodes,
                   bandwidth=2,
@@ -19,7 +22,39 @@ def run_experiment() -> None:
                   network=network)
              for _ in range(num_nodes)]
     PoWMiningOracle(nodes)
-    simulation_parameters.ENV.run(until=10_000)
+    simulation_parameters.ENV.run(until=100)
+
+
+def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
+    fig = go.Figure()
+
+    width = 0.1
+    height = 0.25
+
+    # Set axes ranges
+    fig.update_xaxes(range=[start_time - width, end_time + width])
+    fig.update_yaxes(range=[0 - height, num_nodes + height], dtick=1, tick0=1)
+
+    for block in Block.all_blocks:
+        y = block.miner.id
+        t = block.creation_time
+        if start_time <= t <= end_time:
+            print(block)
+            fig.add_shape(type="rect", xref="x", yref="y", x0=t - width,
+                          x1=t+width,
+                          y0=y-height, y1=y+height)
+            if block.parent and block.parent.creation_time >= start_time:
+                fig.add_annotation(
+                    x=block.parent.creation_time+width, y=block.parent.miner.id,
+                    ax=block.creation_time-width, ay=block.miner.id,
+                    xref='x', yref='y', axref='x', ayref='y', text='',
+                    showarrow=True, arrowhead=3, arrowsize=1, arrowwidth=1, arrowcolor='black')
+
+    fig.update_layout(
+        xaxis_title="time (sec)",
+        yaxis_title="Node ID",
+    )
+    fig.show()
 
 
 if __name__ == "__main__":
@@ -30,7 +65,10 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose',
                         action='store_true', help="print events to stdout")  # on/off flag
 
-    parser.add_argument('-p', '--profile',
+    parser.add_argument('--profile',
+                        action='store_true', help="run a profiler to time the execution")  # on/off flag
+
+    parser.add_argument('--plot',
                         action='store_true', help="run a profiler to time the execution")  # on/off flag
 
     args = parser.parse_args()
@@ -39,3 +77,6 @@ if __name__ == "__main__":
         cProfile.run('run_experiment()')
     else:
         run_experiment()
+
+        if args.plot:
+            plot_timeline(start_time=0, end_time=100, num_nodes=10)

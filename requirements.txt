@@ -1,3 +1,5 @@
 simpy
 numpy
 pythonic-data-structures
+plotly
+pandas

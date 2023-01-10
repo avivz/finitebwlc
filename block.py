@@ -24,6 +24,10 @@ class Block:
             self.__height = 0
 
     @property
+    def creation_time(self) -> float:
+        return self.__creation_time
+
+    @property
     def miner(self) -> "Node":
         return self.__miner
 
