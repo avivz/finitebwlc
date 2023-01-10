@@ -28,7 +28,6 @@ In case of download rules that download towards a tip: Downloading now continues
 ## TODOs
 
 - Implement an attacker node (Strategy: For PoW: reveal tips to make chain longer but only make partial downloads possible)
-- Add support for attacker revealing tips of chain selectively and witholding content selectively
 - Implement a PoS mining oracle
 - Collect information
 - Implement information collection from parallelized experiments
