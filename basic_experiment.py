@@ -9,8 +9,7 @@ import cProfile
 
 def run_experiment() -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
-    env = simpy.core.Environment()
-    network = Network(env=env)
+    network = Network()
 
     num_nodes = 100
     total_block_rate = 1  # blocks per sec
@@ -19,8 +18,8 @@ def run_experiment() -> None:
                   header_delay=0.1,
                   network=network)
              for _ in range(num_nodes)]
-    PoWMiningOracle(nodes, env)
-    env.run(until=10_000)
+    PoWMiningOracle(nodes)
+    simulation_parameters.ENV.run(until=10_000)
 
 
 if __name__ == "__main__":

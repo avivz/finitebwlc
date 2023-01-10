@@ -4,14 +4,14 @@ from block import Block
 import simpy.events
 import simpy.core
 import simpy.exceptions
+import simulation_parameters
 if TYPE_CHECKING:
     from node import Node
 
 
 class Network:
-    def __init__(self, env: simpy.core.Environment) -> None:
+    def __init__(self) -> None:
         self.__nodes: List[Node] = []
-        self.__env = env
 
     def connect(self, node: "Node") -> None:
         self.__nodes.append(node)
@@ -20,9 +20,9 @@ class Network:
         for node in self.__nodes:
             if node is not sender:
                 def task(node: "Node", block: Block) -> Generator[simpy.events.Event, None, None]:
-                    yield self.__env.timeout(node.header_delay)
+                    yield simulation_parameters.ENV.timeout(node.header_delay)
                     node.receive_header(block)
-                self.__env.process(task(node, block))
+                simulation_parameters.ENV.process(task(node, block))
 
     # def _send_block_to_node(self, block: Block, node: "Node") -> Generator[simpy.events.Event, None, None]:
     #     yield self.__env.timeout(self.__header_delay)
@@ -34,13 +34,13 @@ class Network:
 
         def download_task() -> Generator[simpy.events.Event, None, None]:
             time_to_download = 1/bandwidth
-            start_time = self.__env.now
+            start_time = simulation_parameters.ENV.now
             try:
-                yield self.__env.timeout(time_to_download)
+                yield simulation_parameters.ENV.timeout(time_to_download)
                 downloader.progressed_downloading(block, 1.0)
             except simpy.exceptions.Interrupt as i:
-                elapsed_time = self.__env.now - start_time
+                elapsed_time = simulation_parameters.ENV.now - start_time
                 fraction_downloaded = elapsed_time*bandwidth
                 downloader.progressed_downloading(block, fraction_downloaded)
 
-        return self.__env.process(download_task())
+        return simulation_parameters.ENV.process(download_task())

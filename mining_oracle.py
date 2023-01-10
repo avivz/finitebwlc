@@ -4,23 +4,23 @@ import random
 import simpy.core
 import simpy.events
 import numpy.random
+import simulation_parameters
 
 
 class PoWMiningOracle:
-    def __init__(self, nodes: List[Node], env: simpy.core.Environment):
+    def __init__(self, nodes: List[Node]):
         self.__nodes = nodes[:]
         self.__weights = [node.mining_rate for node in nodes]
         self.__total_mining_power = sum(self.__weights)
-        self.__env = env
 
         # start the mining events:
-        env.process(self.run_mining())
+        simulation_parameters.ENV.process(self.run_mining())
 
     def run_mining(self) -> Generator[simpy.events.Timeout, None, None]:
         while True:
             time_to_next_block = get_time_to_next_block(
                 self.__total_mining_power)
-            yield (self.__env.timeout(time_to_next_block))
+            yield (simulation_parameters.ENV.timeout(time_to_next_block))
 
             # select miner by relative weight
             miner, = random.choices(self.__nodes, weights=self.__weights, k=1)
