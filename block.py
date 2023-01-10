@@ -6,8 +6,9 @@ if TYPE_CHECKING:
 class Block:
     __next_id: ClassVar[int] = 0
     all_blocks: ClassVar[List["Block"]] = []
+    GENESIS: ClassVar["Block"]
 
-    def __init__(self, miner: "Node", parent: Optional["Block"], creation_time: float):
+    def __init__(self, miner: Optional["Node"], parent: Optional["Block"], creation_time: float):
         self.__id = Block.__next_id
         Block.__next_id += 1
         Block.all_blocks.append(self)
@@ -28,7 +29,7 @@ class Block:
         return self.__creation_time
 
     @property
-    def miner(self) -> "Node":
+    def miner(self) -> Optional["Node"]:
         return self.__miner
 
     @property
@@ -59,3 +60,6 @@ class Block:
 
     def __str__(self) -> str:
         return f"Block(id={self.id}, h={self.height}, parent_id={self.parent.id if self.parent else None}, creation_time={self.__creation_time})"
+
+
+Block.GENESIS = Block(None, None, 0)

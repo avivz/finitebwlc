@@ -31,7 +31,7 @@ class Node:
 
         # honest node behavior:
         self.__download_pq: DuplicatePriorityQueue = DuplicatePriorityQueue()
-        self.__longest_downloaded_chain: Optional[Block] = None
+        self.__longest_downloaded_chain: Block = Block.GENESIS
 
     @property
     def mining_rate(self) -> float:
@@ -132,7 +132,7 @@ class Node:
         # add block to download store:
         if abs(fraction_downloaded - 1.0) <= EPS:
             self.__downloaded_blocks.add(block)
-            if not self.__longest_downloaded_chain or block.height > self.__longest_downloaded_chain.height:
+            if block.height > self.__longest_downloaded_chain.height:
                 self.__longest_downloaded_chain = block
             if block in self.__download_pq:
                 self.__download_pq.remove_element(block)
