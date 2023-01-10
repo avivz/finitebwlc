@@ -82,7 +82,7 @@ if __name__ == "__main__":
                         action='store_true', help="run a profiler to time the execution")  # on/off flag
 
     parser.add_argument('--plot',
-                        action='store_true', help="run a profiler to time the execution")  # on/off flag
+                        action='store_true', help="plot a block diagram")  # on/off flag
 
     args = parser.parse_args()
     simulation_parameters.verbose = args.verbose
