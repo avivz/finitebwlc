@@ -6,20 +6,19 @@
 - Download towards freshest tip
 - Download towards longest tip : CURRENT! For now: stay with this choice.
 
-In case of download rules that download towards a tip: one must decide if downloading of secondry items is attempted once the tip has been reached. (currently no)
-*Extend to download additional long chains once done*
+In case of download rules that download towards a tip: Downloading now continues towards lower priority tips after it is completed.
 
 ## Download pipeline
 
 - Simple FIFO (1 block at a time towards the target) -> CURRENT!  *Staying with this choice*
-- More advanced: Parallelized with limited slots (e.g., 3 download slots that share bandwidth)
+- More advanced: Parallelized downloads (share bandwidth across multiple simultaneous downloads)
 
-## Modeling questions
+## Modeling choices
 
 - Do we preempt active downloads? (currently yes)  *We need to explain in the paper how this differs from the analysis*
 - Are partial block downloads saved? (currently no)
-- Do headers take time to propagate? (currently yes)
-- How realistic is the network model? should I simulate P2P flooding, or download from a cloud? (currently downloading from cloud)
+- Headers take time to propagate. The time headers are received by a node after publication is node-specific so we can give attackers headers instantly.
+- The current network model is simplistic. Not implementing P2P flooding at this time. Instead we are "downloading from cloud"
 
 ## Information to collect
 

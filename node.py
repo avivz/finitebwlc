@@ -3,6 +3,7 @@ from typing import Set, ClassVar, Optional
 from block import Block
 import network
 import simpy.events
+from DataStructures.AbstractDataStructures import DuplicatePriorityQueue  # type: ignore
 
 
 class Node:
@@ -28,7 +29,7 @@ class Node:
         self.__download_target: Optional[Block] = None
 
         # honest node behavior:
-        self.__longest_header_tip: Optional[Block] = None
+        self.__download_pq: DuplicatePriorityQueue = DuplicatePriorityQueue()
         self.__longest_downloaded_chain: Optional[Block] = None
 
     @property
@@ -59,45 +60,49 @@ class Node:
         self.__downloaded_blocks.add(block)
         self.__longest_downloaded_chain = block
 
-        if not self.__longest_header_tip or self.__longest_header_tip.height <= block.height:
-            self.__longest_header_tip = block
-
         self.__network.schedule_notify_all_of_header(self, block)
         self._reconsider_next_download()
 
     def receive_header(self, block: Block) -> None:
         print(f"Header: Node {self} learns of header {block}")
-        if not self.__longest_header_tip or self.__longest_header_tip.height < block.height:
-            self.__longest_header_tip = block
-
-        # reconsider what to download
+        if self.__download_pq.contains_element(block):
+            return
+        self.__download_pq.enqueue(block, block.height)
         self._reconsider_next_download()
 
     def _reconsider_next_download(self) -> None:
         # find the preferred download target:
         preferred_download = self._find_preferred_download_target()
 
-        # if this is a new target, interrupt the old download.
-        if self.__download_target != preferred_download:
-            # interrupt the old process if it exists
-            if self.__download_process:
-                self.__download_process.interrupt()
+        # if this is the same target, do nothing (keep downloading it)
+        if self.__download_target == preferred_download:
+            return
 
-            self.__download_target = preferred_download
-            # schedule a new download.
-            if preferred_download is not None:
-                self.__download_process = self.__network.schedule_download_single_block(
-                    self, preferred_download, self.bandwidth)
+        # interrupt the old process if it exists
+        if self.__download_process:
+            self.__download_process.interrupt()
+            self.__download_process = None
+
+        self.__download_target = preferred_download
+        # schedule a new download.
+        if preferred_download is not None:
+            self.__download_process = self.__network.schedule_download_single_block(
+                self, preferred_download, self.bandwidth)
 
     # TODO: this is where the behavior of nodes changes the download rule!
     def _find_preferred_download_target(self) -> Optional[Block]:
-        if self.__longest_header_tip is None or self.__longest_header_tip in self.__downloaded_blocks:
-            return None
-        cur = self.__longest_header_tip
-        # travel back to a block that has a downloaded parent
-        while cur.parent and cur.parent not in self.__downloaded_blocks:
-            cur = cur.parent
-        return cur
+        while self.__download_pq.size > 0:
+            block = self.__download_pq.peek()
+            if block in self.__downloaded_blocks:
+                self.__download_pq.dequeue()
+                continue
+
+            cur: Block = block
+            # travel back to a block that has a downloaded parent
+            while cur.parent and cur.parent not in self.__downloaded_blocks:
+                cur = cur.parent
+            return cur
+        return None
 
     def __hash__(self) -> int:
         return self.__id
@@ -116,6 +121,8 @@ class Node:
             self.__downloaded_blocks.add(block)
             if not self.__longest_downloaded_chain or block.height > self.__longest_downloaded_chain.height:
                 self.__longest_downloaded_chain = block
+            if block in self.__download_pq:
+                self.__download_pq.remove_element(block)
             self._reconsider_next_download()
         else:
             # TODO handle partial downloads here. Currently partial downloads are discarded.
