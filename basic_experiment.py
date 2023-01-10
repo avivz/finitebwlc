@@ -24,14 +24,14 @@ def run_experiment() -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog='Mining Simulation',
+        prog='basic_experiment',
         description='Run a basic experiment of the mining simulation')
 
     parser.add_argument('-v', '--verbose',
-                        action='store_true')  # on/off flag
+                        action='store_true', help="print events to stdout")  # on/off flag
 
     parser.add_argument('-p', '--profile',
-                        action='store_true')  # on/off flag
+                        action='store_true', help="run a profiler to time the execution")  # on/off flag
 
     args = parser.parse_args()
     simulation_parameters.verbose = args.verbose
