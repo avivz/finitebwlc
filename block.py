@@ -5,10 +5,13 @@ if TYPE_CHECKING:
 
 class Block:
     __next_id: ClassVar[int] = 0
+    all_blocks: ClassVar[List["Block"]] = []
 
     def __init__(self, miner: "Node", parent: Optional["Block"], creation_time: float):
         self.__id = Block.__next_id
         Block.__next_id += 1
+        Block.all_blocks.append(self)
+
         self.__parent = parent
         self.__children: List["Block"] = []
         self.__is_available = True
