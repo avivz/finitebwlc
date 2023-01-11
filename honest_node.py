@@ -14,7 +14,7 @@ class HonestNode(Node):
     def mine_block(self) -> Block:
         block = super().mine_block()
 
-        self._network.schedule_notify_all_of_header(self, block)
+        self._broadcast_header(block)
         self._reconsider_next_download()
         return block
 

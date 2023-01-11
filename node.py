@@ -25,7 +25,7 @@ class Node(ABC):
 
         # connect to the network
         network.connect(self)
-        self._network = network
+        self.__network = network
 
         # mining target:
         self._mining_target = simulation_parameters.GENESIS
@@ -67,11 +67,13 @@ class Node(ABC):
         self._mining_target = block
         return block
 
-    @abstractmethod
     def receive_header(self, block: Block) -> None:
         if simulation_parameters.verbose:
             print(
                 f"Header t={simulation_parameters.ENV.now:.2f}: Node {self} learns of header {block}")
+
+    def _broadcast_header(self, block: Block) -> None:
+        self.__network.schedule_notify_all_of_header(self, block)
 
     def _stop_cur_download_and_start_new_one(self, block: Optional[Block]) -> None:
         """This methods interrupts any current download and starts a new block download."""
@@ -87,7 +89,7 @@ class Node(ABC):
         self.__download_target = block
         # schedule a new download.
         if block is not None:
-            self.__download_process = self._network.schedule_download_single_block(
+            self.__download_process = self.__network.schedule_download_single_block(
                 self, block, self.bandwidth)
 
     def __hash__(self) -> int:
