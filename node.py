@@ -124,9 +124,8 @@ class Node(ABC):
             print(
                 f"Force-download t={simulation_parameters.ENV.now:.2f}: Node {self} force-downloaded block {block}")
 
-        self.__downloaded_blocks.add(block)
-        if block.height > self.__longest_downloaded_chain.height:
-            self.__longest_downloaded_chain = block
-        if block in self.__download_pq:
-            self.__download_pq.remove_element(block)
-        self._reconsider_next_download()
+        cur = block
+        while cur.parent and cur.parent not in self.__downloaded_blocks:
+            cur = cur.parent
+            self.__downloaded_blocks.add(cur)
+        self.download_complete(block)

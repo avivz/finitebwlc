@@ -44,3 +44,7 @@ class Network:
                 downloader.download_interrupted(block, fraction_downloaded)
 
         return simulation_parameters.ENV.process(download_task())
+
+    def push_block(self, nodes: List[Node], block: Block) -> None:
+        for node in nodes:
+            node.push_download(block)
