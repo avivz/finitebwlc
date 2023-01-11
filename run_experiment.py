@@ -1,26 +1,28 @@
 from honest_node import HonestNode
+from dumb_attacker import DumbAttacker
 from node import Node
 from typing import List
 from mining_oracle import PoWMiningOracle
 from network import Network
 import argparse
 import simulation_parameters
-import cProfile
-import plotly.express as px  # type: ignore
-import pandas as pd  # type: ignore
 from block import Block
 import plotly.graph_objects as go  # type: ignore
 
 
-def run_experiment(num_nodes: int, honest_block_rate: float, bandwidth: float, header_delay: float) -> None:
+def run_experiment(num_nodes: int, honest_block_rate: float, bandwidth: float, header_delay: float, attacker_power: float) -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
     network = Network()
 
-    nodes: List[Node] = [HonestNode(mining_rate=honest_block_rate,
-                                    bandwidth=bandwidth,
-                                    header_delay=header_delay,
-                                    network=network)
-                         for _ in range(num_nodes)]
+    nodes: List[Node] = []
+    if attacker_power:
+        nodes.append(DumbAttacker(attacker_power, network))
+
+    nodes += [HonestNode(mining_rate=honest_block_rate,
+                         bandwidth=bandwidth,
+                         header_delay=header_delay,
+                         network=network)
+              for _ in range(num_nodes)]
 
     PoWMiningOracle(nodes)
 
@@ -83,21 +85,28 @@ if __name__ == "__main__":
     parser.add_argument('--plot',
                         action='store_true', help="plot a block diagram")  # on/off flag
 
+    parser.add_argument(
+        '--attacker', help="include an attacker with the given mining power", type=float, default=0)  # on/off flag
+
     parser.add_argument('--num_honest', nargs=1, required=True, type=int,
                         help="-num_honest <number of honest nodes>")
 
     parser.add_argument('--pow_honest', nargs=1, required=True, type=float,
-                        help="-pow_honest <mining power of each honest node>")
+                        help="--pow_honest <mining power of each honest node>")
 
     parser.add_argument('--bandwidth', nargs=1, required=True, type=float,
-                        help="-bandwidth <bandwidth of each honest node>")
+                        help="--bandwidth <bandwidth of each honest node>")
 
     parser.add_argument('--header_delay', nargs=1, required=True, type=float,
                         help="-header_delay <header delay of each honest node>")
 
     args = parser.parse_args()
     simulation_parameters.verbose = args.verbose
-    run_experiment(int(args.num_honest[0]), float(
-        args.pow_honest[0]), float(args.bandwidth[0]), float(args.header_delay[0]))
+    run_experiment(
+        num_nodes=args.num_honest[0],
+        honest_block_rate=args.pow_honest[0],
+        bandwidth=args.bandwidth[0],
+        header_delay=args.header_delay[0],
+        attacker_power=args.attacker)
     if args.plot:
         plot_timeline(start_time=0, end_time=100, num_nodes=args.num_honest[0])

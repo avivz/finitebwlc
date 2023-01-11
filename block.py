@@ -6,7 +6,6 @@ if TYPE_CHECKING:
 class Block:
     __next_id: ClassVar[int] = 0
     all_blocks: ClassVar[List["Block"]] = []
-    GENESIS: ClassVar["Block"]
 
     def __init__(self, miner: Optional["Node"], parent: Optional["Block"], creation_time: float):
         self.__id = Block.__next_id
