@@ -1,4 +1,6 @@
+from honest_node import HonestNode
 from node import Node
+from typing import List
 from mining_oracle import PoWMiningOracle
 from network import Network
 import argparse
@@ -14,15 +16,15 @@ def run_experiment() -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
     network = Network()
 
-    num_nodes = 10
+    num_nodes = 100
     total_block_rate = 1  # blocks per sec
-    nodes = [Node(mining_rate=total_block_rate/num_nodes,
-                  bandwidth=2,
-                  header_delay=0.1,
-                  network=network)
-             for _ in range(num_nodes)]
+    nodes: List[Node] = [HonestNode(mining_rate=total_block_rate/num_nodes,
+                                    bandwidth=2,
+                                    header_delay=0.1,
+                                    network=network)
+                         for _ in range(num_nodes)]
     PoWMiningOracle(nodes)
-    simulation_parameters.ENV.run(until=100)
+    simulation_parameters.ENV.run(until=10_000)
 
 
 def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
