@@ -1,0 +1,5 @@
+--time 100 
+--num_honest 10 
+--pow_honest 0.1 
+--bandwidth 2 
+--header_delay 0.1 

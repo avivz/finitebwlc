@@ -12,7 +12,7 @@ import logging
 import sys
 
 
-def run_experiment(num_nodes: int, honest_block_rate: float, bandwidth: float, header_delay: float, attacker_power: float) -> None:
+def run_experiment(run_time: float, num_nodes: int, honest_block_rate: float, bandwidth: float, header_delay: float, attacker_power: float) -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
     network = Network()
 
@@ -28,7 +28,7 @@ def run_experiment(num_nodes: int, honest_block_rate: float, bandwidth: float, h
 
     PoWMiningOracle(nodes)
 
-    simulation_parameters.ENV.run(until=100)
+    simulation_parameters.ENV.run(until=run_time)
 
 
 def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
@@ -76,31 +76,40 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
     fig.show()
 
 
+class MyParser(argparse.ArgumentParser):
+    @staticmethod
+    def convert_arg_line_to_args(arg_line: str) -> List[str]:
+        return arg_line.split()
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        prog='basic_experiment',
-        description='Run a basic experiment of the mining simulation')
+    parser = MyParser(
+        prog='run_experiment',
+        description='Run a basic experiment of the mining simulation', fromfile_prefix_chars='@')
 
     parser.add_argument('-v', '--verbose',
                         action='store_true', help="print events to stdout")  # on/off flag
 
-    parser.add_argument('--plot',
-                        action='store_true', help="plot a block diagram")  # on/off flag
+    parser.add_argument('--plot', nargs=2, type=int, metavar=('START', 'END'),
+                        help="plot a block diagram from <START> to <END> times")  # on/off flag
 
-    parser.add_argument(
-        '--attacker', help="include an attacker with the given mining power", type=float, default=0)  # on/off flag
+    parser.add_argument('--attacker', metavar="MINING_POWER",
+                        help="include an attacker with the given mining power (defaults to no attacker)", type=float, default=0)  # on/off flag
+
+    parser.add_argument('--time', nargs=1, required=True, type=float,
+                        help="time to run")
 
     parser.add_argument('--num_honest', nargs=1, required=True, type=int,
-                        help="-num_honest <number of honest nodes>")
+                        help="number of honest nodes")
 
     parser.add_argument('--pow_honest', nargs=1, required=True, type=float,
-                        help="--pow_honest <mining power of each honest node>")
+                        help="mining power of each honest node")
 
     parser.add_argument('--bandwidth', nargs=1, required=True, type=float,
-                        help="--bandwidth <bandwidth of each honest node>")
+                        help="bandwidth of each honest node")
 
     parser.add_argument('--header_delay', nargs=1, required=True, type=float,
-                        help="-header_delay <header delay of each honest node>")
+                        help="header_delay header delay of each honest node")
 
     args = parser.parse_args()
 
@@ -113,6 +122,7 @@ if __name__ == "__main__":
         logger.addHandler(handler)
 
     run_experiment(
+        run_time=args.time[0],
         num_nodes=args.num_honest[0],
         honest_block_rate=args.pow_honest[0],
         bandwidth=args.bandwidth[0],
@@ -120,4 +130,5 @@ if __name__ == "__main__":
         attacker_power=args.attacker)
 
     if args.plot:
-        plot_timeline(start_time=0, end_time=100, num_nodes=args.num_honest[0])
+        plot_timeline(
+            start_time=args.plot[0], end_time=args.plot[1], num_nodes=args.num_honest[0])
