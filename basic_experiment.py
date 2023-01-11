@@ -94,4 +94,4 @@ if __name__ == "__main__":
         run_experiment()
 
         if args.plot:
-            plot_timeline(start_time=0, end_time=20, num_nodes=10)
+            plot_timeline(start_time=0, end_time=100, num_nodes=10)
