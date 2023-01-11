@@ -4,10 +4,9 @@ from adversarial_network import Network
 import argparse
 import simulation_parameters
 import cProfile
-import plotly.express as px  # type: ignore
-import pandas as pd  # type: ignore
 from block import Block
 import plotly.graph_objects as go  # type: ignore
+from typing import List
 
 
 def run_experiment() -> None:

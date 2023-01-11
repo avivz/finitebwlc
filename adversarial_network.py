@@ -1,5 +1,5 @@
 
-from typing import List, Generator, TYPE_CHECKING
+from typing import List, Generator, TYPE_CHECKING, Callable
 from block import Block
 import simpy.events
 import simpy.core
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Network:
-    def __init__(self, f_same_group) -> None:
+    def __init__(self, f_same_group: Callable[[Node, Node], bool]) -> None:
         self.__nodes: List[Node] = []
         self.__f_same_group = f_same_group
 
