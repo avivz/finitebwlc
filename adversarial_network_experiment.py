@@ -1,8 +1,6 @@
-from honest_node import HonestNode
 from node import Node
-from typing import List
 from mining_oracle import PoWMiningOracle
-from network import Network
+from adversarial_network import Network
 import argparse
 import simulation_parameters
 import cProfile
@@ -15,12 +13,13 @@ import plotly.graph_objects as go  # type: ignore
 def run_experiment() -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
 
-    num_nodes = 100
+    num_nodes = 10
     total_block_rate = 1  # blocks per sec
     bandwidth = 0.5  # blocks per sec
     header_delay = 0.1  # sec
 
-    network = Network()
+    network = Network(lambda x, y: (x.id < num_nodes//2)
+                      == (y.id < num_nodes//2))
 
     nodes = [Node(mining_rate=total_block_rate/num_nodes,
                   bandwidth=bandwidth,

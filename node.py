@@ -20,6 +20,8 @@ class Node(ABC):
         self.__bandwidth = bandwidth
         self.__header_delay = header_delay
 
+        self.__downloaded_blocks: Set[Block] = set([Block.GENESIS,])
+
         # connect to the network
         network.connect(self)
         self.__network = network
@@ -116,3 +118,15 @@ class Node(ABC):
         self.__download_process = None
         self.__download_target = None
         # TODO handle partial downloads here. Currently partial downloads are discarded.
+
+    def push_download(self, block: Block) -> None:
+        if simulation_parameters.verbose:
+            print(
+                f"Force-download t={simulation_parameters.ENV.now:.2f}: Node {self} force-downloaded block {block}")
+
+        self.__downloaded_blocks.add(block)
+        if block.height > self.__longest_downloaded_chain.height:
+            self.__longest_downloaded_chain = block
+        if block in self.__download_pq:
+            self.__download_pq.remove_element(block)
+        self._reconsider_next_download()
