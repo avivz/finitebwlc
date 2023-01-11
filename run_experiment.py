@@ -12,25 +12,6 @@ import logging
 import sys
 
 
-def run_experiment(run_time: float, num_nodes: int, honest_block_rate: float, bandwidth: float, header_delay: float, attacker_power: float) -> None:
-    """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
-    network = Network()
-
-    nodes: List[Node] = []
-    if attacker_power:
-        nodes.append(DumbAttacker(attacker_power, network))
-
-    nodes += [HonestNode(mining_rate=honest_block_rate,
-                         bandwidth=bandwidth,
-                         header_delay=header_delay,
-                         network=network)
-              for _ in range(num_nodes)]
-
-    PoWMiningOracle(nodes)
-
-    simulation_parameters.ENV.run(until=run_time)
-
-
 def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
     fig = go.Figure()
 
@@ -82,10 +63,11 @@ class MyParser(argparse.ArgumentParser):
         return arg_line.split()
 
 
-if __name__ == "__main__":
+def setup_parser() -> argparse.ArgumentParser:
     parser = MyParser(
         prog='run_experiment',
-        description='Run a basic experiment of the mining simulation.\nSpecify a configuration file with @<filename>.', fromfile_prefix_chars='@')
+        description='Run a basic experiment of the mining simulation.\nSpecify a configuration file with @<filename>.',
+        fromfile_prefix_chars='@')
 
     parser.add_argument('-v', '--verbose',
                         action='store_true', help="print events to stdout")  # on/off flag
@@ -110,7 +92,30 @@ if __name__ == "__main__":
 
     parser.add_argument('--header_delay', nargs=1, required=True, type=float,
                         help="header_delay header delay of each honest node")
+    return parser
 
+
+def run_experiment(run_time: float, num_nodes: int, honest_block_rate: float, bandwidth: float, header_delay: float, attacker_power: float) -> None:
+    """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
+    network = Network()
+
+    nodes: List[Node] = []
+    if attacker_power:
+        nodes.append(DumbAttacker(attacker_power, network))
+
+    nodes += [HonestNode(mining_rate=honest_block_rate,
+                         bandwidth=bandwidth,
+                         header_delay=header_delay,
+                         network=network)
+              for _ in range(num_nodes)]
+
+    PoWMiningOracle(nodes)
+
+    simulation_parameters.ENV.run(until=run_time)
+
+
+if __name__ == "__main__":
+    parser = setup_parser()
     args = parser.parse_args()
 
     if args.verbose:
