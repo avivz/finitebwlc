@@ -12,21 +12,15 @@ from block import Block
 import plotly.graph_objects as go  # type: ignore
 
 
-def run_experiment() -> None:
+def run_experiment(num_nodes: int, honest_block_rate: float, bandwidth: float, header_delay: float) -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
-
-    num_nodes = 20
-    total_block_rate = 1  # blocks per sec
-    bandwidth = 0.25  # blocks per sec
-    header_delay = 0.1  # sec
-
     network = Network()
 
-    nodes = [Node(mining_rate=total_block_rate/num_nodes,
-                  bandwidth=bandwidth,
-                  header_delay=header_delay,
-                  network=network)
-             for _ in range(num_nodes)]
+    nodes: List[Node] = [HonestNode(mining_rate=honest_block_rate,
+                                    bandwidth=bandwidth,
+                                    header_delay=header_delay,
+                                    network=network)
+                         for _ in range(num_nodes)]
 
     PoWMiningOracle(nodes)
 
@@ -86,18 +80,24 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose',
                         action='store_true', help="print events to stdout")  # on/off flag
 
-    parser.add_argument('--profile',
-                        action='store_true', help="run a profiler to time the execution")  # on/off flag
-
     parser.add_argument('--plot',
                         action='store_true', help="plot a block diagram")  # on/off flag
 
+    parser.add_argument('--num_honest', nargs=1, required=True, type=int,
+                        help="-num_honest <number of honest nodes>")
+
+    parser.add_argument('--pow_honest', nargs=1, required=True, type=float,
+                        help="-pow_honest <mining power of each honest node>")
+
+    parser.add_argument('--bandwidth', nargs=1, required=True, type=float,
+                        help="-bandwidth <bandwidth of each honest node>")
+
+    parser.add_argument('--header_delay', nargs=1, required=True, type=float,
+                        help="-header_delay <header delay of each honest node>")
+
     args = parser.parse_args()
     simulation_parameters.verbose = args.verbose
-    if args.profile:
-        cProfile.run('run_experiment()')
-    else:
-        run_experiment()
-
-        if args.plot:
-            plot_timeline(start_time=0, end_time=100, num_nodes=20)
+    run_experiment(int(args.num_honest[0]), float(
+        args.pow_honest[0]), float(args.bandwidth[0]), float(args.header_delay[0]))
+    if args.plot:
+        plot_timeline(start_time=0, end_time=100, num_nodes=args.num_honest[0])
