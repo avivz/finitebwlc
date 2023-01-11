@@ -55,12 +55,11 @@ class HonestNode(Node):
     def __hash__(self) -> int:
         return self.__id
 
-    def progressed_downloading(self, block: Block, fraction_downloaded: float) -> None:
-        super().progressed_downloading(block, fraction_downloaded)
-        if abs(fraction_downloaded - 1.0) <= Node.DOWNLOAD_PRECISION:
-            if block in self.__download_pq:
-                self.__download_pq.remove_element(block)
-            self._reconsider_next_download()
-        else:
-            # TODO handle partial downloads here.
-            pass
+    def download_complete(self, block: Block) -> None:
+        super().download_complete(block)
+        if block in self.__download_pq:
+            self.__download_pq.remove_element(block)
+        self._reconsider_next_download()
+
+    def download_interrupted(self, block: Block, fraction_downloaded: float) -> None:
+        return super().download_interrupted(block, fraction_downloaded)

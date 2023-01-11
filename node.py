@@ -1,5 +1,5 @@
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Set, ClassVar, Optional
 from block import Block
 import network
@@ -8,9 +8,6 @@ import simulation_parameters
 
 
 class Node(ABC):
-    # precision for comparissons. blocks are considered complete if this is the fraction missing.
-    DOWNLOAD_PRECISION: ClassVar[float] = 0.000001
-
     __next_id: ClassVar[int] = 0
 
     def __init__(self, mining_rate: float, bandwidth: float, header_delay: float, network: network.Network) -> None:
@@ -95,23 +92,27 @@ class Node(ABC):
     def __hash__(self) -> int:
         return self.__hash
 
-    def progressed_downloading(self, block: Block, fraction_downloaded: float) -> None:
-        """Method that is called when dowloading a block is interrupted or finished"""
+    def download_complete(self, block: Block) -> None:
+        """Method that is called when dowloading a block is finished. The mining target is re-adjusted if the current downloaded chain is longest"""
         # finish off the current download process.
         self.__download_process = None
         self.__download_target = None
 
         if simulation_parameters.verbose:
             print(
-                f"Download t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {fraction_downloaded}")
+                f"Download Complete t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}")
 
         # add block to download store:
-        if abs(fraction_downloaded - 1.0) <= Node.DOWNLOAD_PRECISION:
             self._downloaded_blocks.add(block)
             if block.height > self._mining_target.height:
                 self._mining_target = block
-        else:
-            # TODO handle partial downloads here. Currently partial downloads are discarded.
-            # we don't start a new download here because we assume an interrupt means one was already scheduled
-            # this needs to be fixed if block downloads are resumed,because then a fraction can also be a completion.
-            pass
+
+    def download_interrupted(self, block: Block, fraction_downloaded: float) -> None:
+        if simulation_parameters.verbose:
+            print(
+                f"Download Interrupt t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {fraction_downloaded}")
+
+        # finish off the current download process.
+        self.__download_process = None
+        self.__download_target = None
+        # TODO handle partial downloads here. Currently partial downloads are discarded.

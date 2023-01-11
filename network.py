@@ -37,10 +37,10 @@ class Network:
             start_time = simulation_parameters.ENV.now
             try:
                 yield simulation_parameters.ENV.timeout(time_to_download)
-                downloader.progressed_downloading(block, 1.0)
+                downloader.download_complete(block)
             except simpy.exceptions.Interrupt as i:
                 elapsed_time = simulation_parameters.ENV.now - start_time
                 fraction_downloaded = elapsed_time*bandwidth
-                downloader.progressed_downloading(block, fraction_downloaded)
+                downloader.download_interrupted(block, fraction_downloaded)
 
         return simulation_parameters.ENV.process(download_task())
