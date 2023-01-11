@@ -52,9 +52,6 @@ class HonestNode(Node):
             return cur
         return None
 
-    def __hash__(self) -> int:
-        return self.__id
-
     def download_complete(self, block: Block) -> None:
         super().download_complete(block)
         if block in self.__download_pq:
