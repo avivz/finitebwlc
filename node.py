@@ -20,8 +20,6 @@ class Node(ABC):
         self.__bandwidth = bandwidth
         self.__header_delay = header_delay
 
-        self.__downloaded_blocks: Set[Block] = set([Block.GENESIS,])
-
         # connect to the network
         network.connect(self)
         self.__network = network
@@ -125,7 +123,7 @@ class Node(ABC):
                 f"Force-download t={simulation_parameters.ENV.now:.2f}: Node {self} force-downloaded block {block}")
 
         cur = block
-        while cur.parent and cur.parent not in self.__downloaded_blocks:
+        while cur.parent and cur.parent not in self._downloaded_blocks:
             cur = cur.parent
-            self.__downloaded_blocks.add(cur)
+            self._downloaded_blocks.add(cur)
         self.download_complete(block)
