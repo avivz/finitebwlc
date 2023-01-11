@@ -45,6 +45,6 @@ class Network:
 
         return simulation_parameters.ENV.process(download_task())
 
-    def push_block(self, nodes: List[Node], block: Block) -> None:
+    def push_block(self, nodes: List["Node"], block: Block) -> None:
         for node in nodes:
             node.push_download(block)
