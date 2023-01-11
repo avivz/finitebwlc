@@ -15,9 +15,9 @@ import plotly.graph_objects as go  # type: ignore
 def run_experiment() -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
 
-    num_nodes = 100
+    num_nodes = 20
     total_block_rate = 1  # blocks per sec
-    bandwidth = 0.5  # blocks per sec
+    bandwidth = 0.25  # blocks per sec
     header_delay = 0.1  # sec
 
     network = Network()
@@ -100,4 +100,4 @@ if __name__ == "__main__":
         run_experiment()
 
         if args.plot:
-            plot_timeline(start_time=0, end_time=100, num_nodes=10)
+            plot_timeline(start_time=0, end_time=100, num_nodes=20)
