@@ -85,7 +85,7 @@ class MyParser(argparse.ArgumentParser):
 if __name__ == "__main__":
     parser = MyParser(
         prog='run_experiment',
-        description='Run a basic experiment of the mining simulation', fromfile_prefix_chars='@')
+        description='Run a basic experiment of the mining simulation.\nSpecify a configuration file with @<filename>.', fromfile_prefix_chars='@')
 
     parser.add_argument('-v', '--verbose',
                         action='store_true', help="print events to stdout")  # on/off flag
