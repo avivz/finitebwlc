@@ -4,7 +4,6 @@ from typing import Set, ClassVar, Optional
 from block import Block
 import network
 import simpy.events
-from DataStructures.AbstractDataStructures import DuplicatePriorityQueue  # type: ignore
 import simulation_parameters
 
 

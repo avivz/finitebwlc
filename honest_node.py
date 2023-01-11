@@ -1,11 +1,9 @@
 
-from typing import Set, ClassVar, Optional
+from typing import Optional
 from block import Block
 from node import Node
 import network
-import simpy.events
 from DataStructures.AbstractDataStructures import DuplicatePriorityQueue  # type: ignore
-import simulation_parameters
 
 
 class HonestNode(Node):
