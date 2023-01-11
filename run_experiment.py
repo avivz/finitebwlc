@@ -8,6 +8,8 @@ import argparse
 import simulation_parameters
 from block import Block
 import plotly.graph_objects as go  # type: ignore
+import logging
+import sys
 
 
 def run_experiment(num_nodes: int, honest_block_rate: float, bandwidth: float, header_delay: float, attacker_power: float) -> None:
@@ -39,7 +41,7 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
     fig.update_xaxes(range=[start_time - width, end_time + width])
     fig.update_yaxes(range=[0 - height, num_nodes + height], dtick=1, tick0=1)
 
-    # alternative plotting of blocks using markers
+    # plotting of blocks using markers
     x_vals = [block.creation_time for block in Block.all_blocks if start_time <=
               block.creation_time <= end_time]
     y_vals = [block.miner.id if block.miner else 0 for block in Block.all_blocks if start_time <=
@@ -53,7 +55,7 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
         miner_id = block.miner.id if block.miner else 0
 
         if start_time <= block.creation_time <= end_time:
-            # draw a rectangle for the block
+            # Alternative: draw a rectangle for the block
             # fig.add_shape(type="rect", xref="x", yref="y", x0=block.creation_time - width,
             #               x1=block.creation_time+width,
             #               y0=miner_id-height, y1=miner_id+height, fillcolor="blue",)
@@ -101,12 +103,21 @@ if __name__ == "__main__":
                         help="-header_delay <header delay of each honest node>")
 
     args = parser.parse_args()
-    simulation_parameters.verbose = args.verbose
+
+    if args.verbose:
+        logger = logging.getLogger("SIM_INFO")
+        logger.setLevel(logging.INFO)
+
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(logging.INFO)
+        logger.addHandler(handler)
+
     run_experiment(
         num_nodes=args.num_honest[0],
         honest_block_rate=args.pow_honest[0],
         bandwidth=args.bandwidth[0],
         header_delay=args.header_delay[0],
         attacker_power=args.attacker)
+
     if args.plot:
         plot_timeline(start_time=0, end_time=100, num_nodes=args.num_honest[0])

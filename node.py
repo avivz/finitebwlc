@@ -5,6 +5,7 @@ from block import Block
 import network
 import simpy.events
 import simulation_parameters
+import logging
 
 
 class Node(ABC):
@@ -56,18 +57,16 @@ class Node(ABC):
         the block is mined on top of the current mining target, and the mining target is adjusted to the new block"""
         block = Block(self, self._mining_target,
                       simulation_parameters.ENV.now)
-        if simulation_parameters.verbose:
-            print(
-                f"Mining t={simulation_parameters.ENV.now:.2f}: Node {self} mines block {block}")
+        message = f"Mining t={simulation_parameters.ENV.now:.2f}: Node {self} mines block {block}"
+        logging.getLogger("SIM_INFO").info(message)
 
         self._downloaded_blocks.add(block)
         self._mining_target = block
         return block
 
     def receive_header(self, block: Block) -> None:
-        if simulation_parameters.verbose:
-            print(
-                f"Header t={simulation_parameters.ENV.now:.2f}: Node {self} learns of header {block}")
+        message = f"Header t={simulation_parameters.ENV.now:.2f}: Node {self} learns of header {block}"
+        logging.getLogger("SIM_INFO").info(message)
 
     def _broadcast_header(self, block: Block) -> None:
         self.__network.schedule_notify_all_of_header(self, block)
@@ -98,19 +97,17 @@ class Node(ABC):
         self.__download_process = None
         self.__download_target = None
 
-        if simulation_parameters.verbose:
-            print(
-                f"Download Complete t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}")
+        message = f"Download Complete t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}"
+        logging.getLogger("SIM_INFO").info(message)
 
         # add block to download store:
-            self._downloaded_blocks.add(block)
-            if block.height > self._mining_target.height:
-                self._mining_target = block
+        self._downloaded_blocks.add(block)
+        if block.height > self._mining_target.height:
+            self._mining_target = block
 
     def download_interrupted(self, block: Block, fraction_downloaded: float) -> None:
-        if simulation_parameters.verbose:
-            print(
-                f"Download Interrupt t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {fraction_downloaded}")
+        message = f"Download Interrupt t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {fraction_downloaded}"
+        logging.getLogger("SIM_INFO").info(message)
 
         # finish off the current download process.
         self.__download_process = None
@@ -118,9 +115,8 @@ class Node(ABC):
         # TODO handle partial downloads here. Currently partial downloads are discarded.
 
     def push_download(self, block: Block) -> None:
-        if simulation_parameters.verbose:
-            print(
-                f"Force-download t={simulation_parameters.ENV.now:.2f}: Node {self} force-downloaded block {block}")
+        message = f"Force-download t={simulation_parameters.ENV.now:.2f}: Node {self} force-downloaded block {block}"
+        logging.getLogger("SIM_INFO").info(message)
 
         cur = block
         while cur.parent and cur.parent not in self._downloaded_blocks:
