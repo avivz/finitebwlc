@@ -1,15 +1,20 @@
+from typing import List
+
+import argparse
+import logging
+import sys
+import json
+
 from honest_node import HonestNode
 from dumb_attacker import DumbAttacker
 from node import Node
-from typing import List
 from mining_oracle import PoWMiningOracle
 from network import Network
-import argparse
 import simulation_parameters
 from block import Block
+
+
 import plotly.graph_objects as go  # type: ignore
-import logging
-import sys
 
 
 def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
@@ -92,6 +97,9 @@ def setup_parser() -> argparse.ArgumentParser:
 
     parser.add_argument('--header_delay', nargs=1, required=True, type=float,
                         help="header_delay header delay of each honest node")
+
+    parser.add_argument('--saveResults', nargs=1, type=argparse.FileType('w'),
+                        help="filename (Where to save the results of the simulation)")
     return parser
 
 
@@ -114,6 +122,13 @@ def run_experiment(run_time: float, num_nodes: int, honest_block_rate: float, ba
     simulation_parameters.ENV.run(until=run_time)
 
 
+def calc_honest_chain_height() -> int:
+    for block in reversed(Block.all_blocks):
+        if type(block.miner) == HonestNode:
+            return block.height
+    return 0
+
+
 if __name__ == "__main__":
     parser = setup_parser()
     args = parser.parse_args()
@@ -126,13 +141,22 @@ if __name__ == "__main__":
         handler.setLevel(logging.INFO)
         logger.addHandler(handler)
 
-    run_experiment(
-        run_time=args.time[0],
-        num_nodes=args.num_honest[0],
-        honest_block_rate=args.pow_honest[0],
-        bandwidth=args.bandwidth[0],
-        header_delay=args.header_delay[0],
-        attacker_power=args.attacker)
+    run_config = dict(run_time=args.time[0],
+                      num_nodes=args.num_honest[0],
+                      honest_block_rate=args.pow_honest[0],
+                      bandwidth=args.bandwidth[0],
+                      header_delay=args.header_delay[0],
+                      attacker_power=args.attacker)
+
+    run_experiment(**run_config)
+    honest_chain_height = calc_honest_chain_height()
+    result = run_config | {"honest_chain_height": honest_chain_height}
+
+    # write the results to stdout or file:
+    if args.saveResults:
+        json.dump(result, args.saveResults[0], indent=2)
+    else:
+        json.dump(result, sys.stdout, indent=2)
 
     if args.plot:
         plot_timeline(

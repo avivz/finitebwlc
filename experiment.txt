@@ -1,5 +1,5 @@
---time 100 
---num_honest 10 
---pow_honest 0.1 
---bandwidth 2 
---header_delay 0.1 
+--time 1000
+--num_honest 100 
+--pow_honest 0.01 
+--bandwidth 0.1
+--header_delay 0 
