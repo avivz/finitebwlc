@@ -11,7 +11,7 @@ arguments = ["--time 100",
 "--num_honest 100", 
 "--pow_honest 0.01", 
 "--bandwidth 2", 
-"--header_delay 0.1", "-v"]
+"--header_delay 0.1"]
 
 cmd = f"{PYTHON_PATH} {SIMULATION_PATH} {' '.join(arguments)}"
 print(cmd)
