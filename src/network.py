@@ -33,7 +33,10 @@ class Network:
             raise ValueError(f"block is not available! {block}")
 
         def download_task() -> Generator[simpy.events.Event, None, None]:
-            time_to_download = 1/bandwidth
+            if bandwidth<=0: 
+                time_to_download = 0.0
+            else:
+                time_to_download = 1/bandwidth
             start_time = simulation_parameters.ENV.now
             try:
                 yield simulation_parameters.ENV.timeout(time_to_download)
