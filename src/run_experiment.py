@@ -127,7 +127,7 @@ def run_experiment(run_time: float, num_nodes: int, honest_block_rate: float, ba
 
 def setup_progress_bar(run_time: float, num_updates: int = 100) -> None:
     def progress_bar_process() -> Generator[simpy.events.Event, None, None]:
-        with tqdm.tqdm(total=run_time, disable=None) as pbar:
+        with tqdm.tqdm(total=run_time, disable=None, unit="sim_secs") as pbar:
             for i in range(num_updates):
                 yield simulation_parameters.ENV.timeout(run_time/num_updates)
                 pbar.update(run_time/num_updates)
