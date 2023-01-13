@@ -3,3 +3,5 @@ numpy
 pythonic-data-structures
 plotly
 pandas
+mypy
+autopep8

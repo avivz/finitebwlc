@@ -3,6 +3,7 @@
 
 # virtual environment
 env/
+env_rory/
 
 #cache
 __pycache__/
