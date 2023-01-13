@@ -1,4 +1,4 @@
---time 1000
+--time 10000
 --num_honest 100 
 --pow_honest 0.01 
 --bandwidth 0.1
