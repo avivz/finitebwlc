@@ -162,7 +162,8 @@ if __name__ == "__main__":
 
     run_experiment(**run_config)
     honest_chain_height = calc_honest_chain_height()
-    result = run_config.update({"honest_chain_height": honest_chain_height})
+    result = dict(run_config)
+    result.update({"honest_chain_height": honest_chain_height})
 
     # write the results to stdout or file:
     if args.saveResults:
