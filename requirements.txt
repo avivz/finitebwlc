@@ -5,3 +5,5 @@ plotly
 pandas
 mypy
 autopep8
+tqdm
+types-tqdm
