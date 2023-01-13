@@ -18,8 +18,7 @@ def setup_parser() -> argparse.ArgumentParser:
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 SIMULATION_PATH = os.path.join(BASE_PATH, "src/run_experiment.py")
 
-ENV_ACTIVATE_PATH = os.path.join(BASE_PATH, "env/bin/activate")
-PYTHON_PATH = os.path.join(BASE_PATH, "env/bin/python")
+PYTHON_PATH = "python"
 
 OUTPUT_PATH = os.path.join(BASE_PATH, "experiment_honest_growth/data/")
 
