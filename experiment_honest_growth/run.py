@@ -12,6 +12,8 @@ def setup_parser() -> argparse.ArgumentParser:
 
     parser.add_argument('--slurm',
                         action='store_true', help="runs the code in parallel on slurm using sbatch")  # on/off flag
+    parser.add_argument('--no_out',
+                        action='store_true', help="runs the code in parallel on slurm using sbatch")  # on/off flag
     return parser
 
 
@@ -47,6 +49,9 @@ for index, bandwidth in enumerate(bandwidth_range):
     if args.slurm:
         cmd1 = f'sbatch --mem=8g -c1 --wrap="{cmd1}"'
         cmd2 = f'sbatch --mem=8g -c1 --wrap="{cmd2}"'
+        if args.no_out:
+            cmd1 += ' --output=/dev/null'
+            cmd2 += ' --output=/dev/null'
 
     print(f"{index}: running:\n\t{cmd1}")
     os.system(cmd1)
