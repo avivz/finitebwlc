@@ -1,4 +1,5 @@
-from typing import List, Generator
+import dataclasses
+from typing import List, Generator, Optional, Tuple
 
 import argparse
 import logging
@@ -64,6 +65,17 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
     fig.show()
 
 
+@dataclasses.dataclass
+class RunConfig:
+    run_time: float
+    num_honest: int
+    honest_block_rate: float
+    bandwidth: float
+    header_delay: float
+    attacker_power: float
+    plotting: Optional[Tuple[float, float]]
+
+
 class MyParser(argparse.ArgumentParser):
     @staticmethod
     def convert_arg_line_to_args(arg_line: str) -> List[str]:
@@ -105,24 +117,26 @@ def setup_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def run_experiment(run_time: float, num_honest: int, honest_block_rate: float, bandwidth: float, header_delay: float, attacker_power: float) -> None:
-    """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
-    network = Network()
+class Experiment:
+    def __init__(self, run_config: RunConfig) -> None:
+        self.network = Network()
+        self.nodes: List[Node] = []
+        if run_config.attacker_power:
+            self.nodes.append(DumbAttacker(
+                run_config.attacker_power, self.network))
+        self.nodes += [HonestNode(mining_rate=run_config.honest_block_rate,
+                                  bandwidth=run_config.bandwidth,
+                                  header_delay=run_config.header_delay,
+                                  network=self.network)
+                       for _ in range(run_config.num_honest)]
+        self.mining_oracle = PoWMiningOracle(self.nodes)
+        self.run_time = run_config.run_time
+        setup_progress_bar(self.run_time)
 
-    nodes: List[Node] = []
-    if attacker_power:
-        nodes.append(DumbAttacker(attacker_power, network))
+    def run_experiment(self) -> None:
+        """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
 
-    nodes += [HonestNode(mining_rate=honest_block_rate,
-                         bandwidth=bandwidth,
-                         header_delay=header_delay,
-                         network=network)
-              for _ in range(num_honest)]
-
-    PoWMiningOracle(nodes)
-
-    setup_progress_bar(run_time)
-    simulation_parameters.ENV.run(until=run_time)
+        simulation_parameters.ENV.run(until=self.run_time)
 
 
 def setup_progress_bar(run_time: float, num_updates: int = 100) -> None:
@@ -153,16 +167,20 @@ if __name__ == "__main__":
         handler.setLevel(logging.INFO)
         logger.addHandler(handler)
 
-    run_config = dict(run_time=args.run_time[0],
-                      num_honest=args.num_honest[0],
-                      honest_block_rate=args.pow_honest[0],
-                      bandwidth=args.bandwidth[0],
-                      header_delay=args.header_delay[0],
-                      attacker_power=args.attacker_power)
+    run_config = RunConfig(
+        run_time=args.run_time[0],
+        num_honest=args.num_honest[0],
+        honest_block_rate=args.pow_honest[0],
+        bandwidth=args.bandwidth[0],
+        header_delay=args.header_delay[0],
+        attacker_power=args.attacker_power,
+        plotting=args.plot if args.plot else None
+    )
 
-    run_experiment(**run_config)
+    experiment = Experiment(run_config)
+    experiment.run_experiment()
     honest_chain_height = calc_honest_chain_height()
-    result = dict(run_config)
+    result = dataclasses.asdict(run_config)
     result.update({"honest_chain_height": honest_chain_height})
 
     # write the results to stdout or file:
