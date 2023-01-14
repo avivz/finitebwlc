@@ -12,7 +12,7 @@ class LimittedQueue(Generic[T]):
         self._queue: List[Tuple[Any, T]] = list()
         self._buffer_size = buffer_size
 
-    def enqueue(self, priority: Any, item: T) -> None:
+    def enqueue(self, item: T, priority: Any) -> None:
         rec = priority, item
         if len(self._queue) >= self._buffer_size:
             for ind in range(len(self._queue)-1, -1, -1):
