@@ -7,3 +7,5 @@ mypy
 autopep8
 tqdm
 types-tqdm
+pylru
+snakeviz

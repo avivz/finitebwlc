@@ -29,7 +29,7 @@ class Network:
     #     node.receive_header(block)
 
     def schedule_download_single_block(self, downloader: "Node", block: Block, bandwidth: float,
-                                       fraction_already_dled: float = 0) -> simpy.events.Process:
+                                       fraction_already_dled: float) -> simpy.events.Process:
         if not block.is_available:
             raise ValueError(f"block is not available! {block}")
 

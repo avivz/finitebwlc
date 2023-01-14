@@ -6,12 +6,14 @@ import network
 import simpy.events
 import simulation_parameters
 import logging
+import pylru  # type: ignore
 
 
 class Node(ABC):
     __next_id: ClassVar[int] = 0
 
-    def __init__(self, mining_rate: float, bandwidth: float, header_delay: float, network: network.Network) -> None:
+    def __init__(self, mining_rate: float, bandwidth: float, header_delay: float,
+                 network: network.Network, partial_block_cache_size: int = 10) -> None:
         # set a unique id:
         self.__id = Node.__next_id
         Node.__next_id += 1
@@ -33,6 +35,8 @@ class Node(ABC):
         self.__download_process: Optional[simpy.events.Process] = None
         self.__download_target: Optional[Block] = None
         self._downloaded_blocks: Set[Block] = {simulation_parameters.GENESIS}
+
+        self._partial_blocks = pylru.lrucache(partial_block_cache_size)
 
     @property
     def mining_rate(self) -> float:
@@ -86,8 +90,11 @@ class Node(ABC):
         self.__download_target = block
         # schedule a new download.
         if block is not None:
+            fraction_already_dled = 0
+            if block in self._partial_blocks:
+                fraction_already_dled = self._partial_blocks[block]
             self.__download_process = self.__network.schedule_download_single_block(
-                self, block, self.bandwidth)
+                self, block, self.bandwidth, fraction_already_dled)
 
     def __hash__(self) -> int:
         return self.__hash
@@ -103,6 +110,9 @@ class Node(ABC):
 
         # add block to download store:
         self._downloaded_blocks.add(block)
+        if block in self._partial_blocks:
+            del self._partial_blocks[block]
+
         if block.height > self._mining_target.height:
             self._mining_target = block
 
@@ -110,6 +120,7 @@ class Node(ABC):
         message = f"Download Interrupt t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {cummulative_fraction_downloaded}"
         logging.getLogger("SIM_INFO").info(message)
 
+        self._partial_blocks[block] = cummulative_fraction_downloaded
         # TODO handle partial downloads here. Currently partial downloads are discarded.
 
     def push_download(self, block: Block) -> None:
@@ -120,4 +131,6 @@ class Node(ABC):
         while cur.parent and cur.parent not in self._downloaded_blocks:
             cur = cur.parent
             self._downloaded_blocks.add(cur)
+            if cur in self._partial_blocks:
+                del self._partial_blocks[cur]
         self.download_complete(block)
