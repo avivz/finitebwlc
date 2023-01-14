@@ -73,7 +73,7 @@ class RunConfig:
     bandwidth: float
     header_delay: float
     attacker_power: float
-    plotting: Optional[Tuple[float, float]]
+    plot: Optional[Tuple[float, float]]
 
 
 class MyParser(argparse.ArgumentParser):
@@ -173,7 +173,7 @@ if __name__ == "__main__":
         bandwidth=args.bandwidth[0],
         header_delay=args.header_delay[0],
         attacker_power=args.attacker_power,
-        plotting=args.plot if args.plot else None
+        plot=args.plot if args.plot else None
     )
 
     experiment = Experiment(run_config)
