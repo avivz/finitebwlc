@@ -82,10 +82,10 @@ def setup_parser() -> argparse.ArgumentParser:
     parser.add_argument('--plot', nargs=2, type=int, metavar=('START', 'END'),
                         help="plot a block diagram from <START> to <END> times")  # on/off flag
 
-    parser.add_argument('--attacker', metavar="MINING_POWER",
+    parser.add_argument('--attacker_power', metavar="MINING_POWER",
                         help="include an attacker with the given mining power (defaults to no attacker)", type=float, default=0)  # on/off flag
 
-    parser.add_argument('--time', nargs=1, required=True, type=float,
+    parser.add_argument('--run_time', nargs=1, required=True, type=float,
                         help="time to run")
 
     parser.add_argument('--num_honest', nargs=1, required=True, type=int,
@@ -105,7 +105,7 @@ def setup_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def run_experiment(run_time: float, num_nodes: int, honest_block_rate: float, bandwidth: float, header_delay: float, attacker_power: float) -> None:
+def run_experiment(run_time: float, num_honest: int, honest_block_rate: float, bandwidth: float, header_delay: float, attacker_power: float) -> None:
     """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
     network = Network()
 
@@ -117,7 +117,7 @@ def run_experiment(run_time: float, num_nodes: int, honest_block_rate: float, ba
                          bandwidth=bandwidth,
                          header_delay=header_delay,
                          network=network)
-              for _ in range(num_nodes)]
+              for _ in range(num_honest)]
 
     PoWMiningOracle(nodes)
 
@@ -153,12 +153,12 @@ if __name__ == "__main__":
         handler.setLevel(logging.INFO)
         logger.addHandler(handler)
 
-    run_config = dict(run_time=args.time[0],
-                      num_nodes=args.num_honest[0],
+    run_config = dict(run_time=args.run_time[0],
+                      num_honest=args.num_honest[0],
                       honest_block_rate=args.pow_honest[0],
                       bandwidth=args.bandwidth[0],
                       header_delay=args.header_delay[0],
-                      attacker_power=args.attacker)
+                      attacker_power=args.attacker_power)
 
     run_experiment(**run_config)
     honest_chain_height = calc_honest_chain_height()
