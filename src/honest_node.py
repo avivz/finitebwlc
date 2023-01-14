@@ -3,13 +3,13 @@ from typing import Optional
 from block import Block
 from node import Node
 import network
-from DataStructures.AbstractDataStructures import DuplicatePriorityQueue  # type: ignore
+from limitted_queue import LimittedQueue
 
 
 class HonestNode(Node):
     def __init__(self, mining_rate: float, bandwidth: float, header_delay: float, network: network.Network) -> None:
         super().__init__(mining_rate, bandwidth, header_delay, network)
-        self.__download_pq: DuplicatePriorityQueue = DuplicatePriorityQueue()
+        self.__dl_queue: LimittedQueue[Block, int] = LimittedQueue()
 
     def mine_block(self) -> Block:
         block = super().mine_block()
@@ -20,12 +20,7 @@ class HonestNode(Node):
 
     def receive_header(self, block: Block) -> None:
         super().receive_header(block)
-        if self.__download_pq.contains_element(block):
-            return
-        # TODO: The priority that is chosen here should be changed for other download rules
-        if self.__download_pq.contains_element(block.parent):
-            self.__download_pq.remove_element(block.parent)
-        self.__download_pq.enqueue(block, block.height)
+        self.__dl_queue.enqueue(block, block.height)
         self._reconsider_next_download()
 
     def _reconsider_next_download(self) -> None:
@@ -34,10 +29,10 @@ class HonestNode(Node):
         self._stop_cur_download_and_start_new_one(preferred_download)
 
     def _find_preferred_download_target(self) -> Optional[Block]:
-        while self.__download_pq.size > 0:
-            block = self.__download_pq.peek()
+        while len(self.__dl_queue) > 0:
+            block = self.__dl_queue.peek()
             if block in self._downloaded_blocks:
-                self.__download_pq.dequeue()
+                self.__dl_queue.dequeue()
                 continue
 
             cur: Block = block
@@ -47,15 +42,13 @@ class HonestNode(Node):
 
             # if the block we want to download is discovered as unavailable, we remove the tip from further consideration (it needs to be re-anounced if it is to be considered again)
             if not cur.is_available:
-                self.__download_pq.dequeue()
+                self.__dl_queue.dequeue()
                 continue
             return cur
         return None
 
     def download_complete(self, block: Block) -> None:
         super().download_complete(block)
-        if block in self.__download_pq:
-            self.__download_pq.remove_element(block)
         self._reconsider_next_download()
 
     def download_interrupted(self, block: Block, fraction_downloaded: float) -> None:
