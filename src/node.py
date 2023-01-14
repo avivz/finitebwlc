@@ -109,9 +109,6 @@ class Node(ABC):
         message = f"Download Interrupt t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {fraction_downloaded}"
         logging.getLogger("SIM_INFO").info(message)
 
-        # finish off the current download process.
-        self.__download_process = None
-        self.__download_target = None
         # TODO handle partial downloads here. Currently partial downloads are discarded.
 
     def push_download(self, block: Block) -> None:
