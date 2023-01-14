@@ -1,5 +1,5 @@
 
-from typing import List, Generator, TYPE_CHECKING
+from typing import List, Generator, TYPE_CHECKING, Dict, Tuple, Optional
 from block import Block
 import simpy.events
 import simpy.core
@@ -10,11 +10,17 @@ if TYPE_CHECKING:
 
 
 class Network:
-    def __init__(self) -> None:
+    def __init__(self, log_downloads: bool = False) -> None:
         self.__nodes: List[Node] = []
+        self.__download_log: Optional[Dict[Node,
+                                           List[Tuple[Block, float, float]]]] = None
+        if log_downloads:
+            self.__download_log = {}
 
     def connect(self, node: "Node") -> None:
         self.__nodes.append(node)
+        if self.__download_log is not None:
+            self.__download_log[node] = []
 
     def schedule_notify_all_of_header(self, sender: "Node", block: Block) -> None:
         for node in self.__nodes:
@@ -46,9 +52,18 @@ class Network:
                 elapsed_time = simulation_parameters.ENV.now - start_time
                 fraction_downloaded = elapsed_time*bandwidth + fraction_already_dled
                 downloader.download_interrupted(block, fraction_downloaded)
+            finally:
+                if self.__download_log:
+                    end_time = simulation_parameters.ENV.now
+                    self.__download_log[downloader].append(
+                        (block, float(start_time), float(end_time)))
 
         return simulation_parameters.ENV.process(download_task())
 
     def push_block(self, nodes: List["Node"], block: Block) -> None:
         for node in nodes:
             node.push_download(block)
+
+    @property
+    def download_log(self) -> Optional[Dict[Node, List[Tuple[Block, float, float]]]]:
+        return self.__download_log
