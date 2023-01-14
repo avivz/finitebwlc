@@ -16,6 +16,7 @@ class Node(ABC):
         self.__id = Node.__next_id
         Node.__next_id += 1
         self.__hash = hash(self.__id)
+        self.__description = f"{self.__class__.__name__}_{self.id}"
 
         self.__mining_rate = mining_rate
         self.__bandwidth = bandwidth
@@ -50,7 +51,7 @@ class Node(ABC):
         return self.__header_delay
 
     def __str__(self) -> str:
-        return f"{self.__class__.__name__}_{self.id}"
+        return self.__description
 
     def mine_block(self) -> Block:
         """This method is called externally by the mining oracle.
@@ -105,8 +106,8 @@ class Node(ABC):
         if block.height > self._mining_target.height:
             self._mining_target = block
 
-    def download_interrupted(self, block: Block, fraction_downloaded: float) -> None:
-        message = f"Download Interrupt t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {fraction_downloaded}"
+    def download_interrupted(self, block: Block, cummulative_fraction_downloaded: float) -> None:
+        message = f"Download Interrupt t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {cummulative_fraction_downloaded}"
         logging.getLogger("SIM_INFO").info(message)
 
         # TODO handle partial downloads here. Currently partial downloads are discarded.

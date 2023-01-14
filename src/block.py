@@ -23,6 +23,8 @@ class Block:
         else:
             self.__height = 0
 
+        self.__description = f"Block(id={self.id}, h={self.height}, parent_id={self.parent.id if self.parent else None}, creation_time={self.__creation_time})"
+
     @property
     def creation_time(self) -> float:
         return self.__creation_time
@@ -58,4 +60,4 @@ class Block:
         return self.__id
 
     def __str__(self) -> str:
-        return f"Block(id={self.id}, h={self.height}, parent_id={self.parent.id if self.parent else None}, creation_time={self.__creation_time})"
+        return self.__description
