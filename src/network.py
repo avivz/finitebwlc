@@ -65,5 +65,5 @@ class Network:
             node.push_download(block)
 
     @property
-    def download_log(self) -> Optional[Dict[Node, List[Tuple[Block, float, float]]]]:
+    def download_log(self) -> Optional[Dict["Node", List[Tuple[Block, float, float]]]]:
         return self.__download_log
