@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Generator, Optional, Tuple
+from typing import List, Generator, Optional, Tuple, Any, Dict
 
 import argparse
 import logging
@@ -135,7 +135,6 @@ class Experiment:
 
     def run_experiment(self) -> None:
         """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
-
         simulation_parameters.ENV.run(until=self.run_time)
 
 
@@ -179,9 +178,12 @@ if __name__ == "__main__":
 
     experiment = Experiment(run_config)
     experiment.run_experiment()
+
     honest_chain_height = calc_honest_chain_height()
-    result = dataclasses.asdict(run_config)
-    result.update({"honest_chain_height": honest_chain_height})
+
+    result: Dict[str, Any] = {}
+    result["config"] = dataclasses.asdict(run_config)
+    result["honest_chain_height"] = honest_chain_height
 
     # write the results to stdout or file:
     if args.saveResults:
