@@ -3,7 +3,7 @@ from typing import TypeVar, Generic, List, Tuple, Any
 T = TypeVar('T')
 
 
-class OptimisticQueue(Generic[T]):
+class LimittedQueue(Generic[T]):
     """max priority queue that keeps only the top k items. 
     Enqueue is O(n) where n is the actual queue size, dequeue is O(1)"""
 
