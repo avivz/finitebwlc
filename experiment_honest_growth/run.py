@@ -24,7 +24,7 @@ PYTHON_PATH = "python"
 
 OUTPUT_PATH = os.path.join(BASE_PATH, "experiment_honest_growth/data/")
 
-base_arguments = ["--time 2000", "--num_honest 100",
+base_arguments = ["--run_time 10000", "--num_honest 100",
                   "--pow_honest 0.01"]  # "--header_delay 0"  "--bandwidth -1"
 
 bandwidth_range = numpy.arange(0.1, 4.2, 0.05)
