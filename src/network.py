@@ -28,22 +28,23 @@ class Network:
     #     yield self.__env.timeout(self.__header_delay)
     #     node.receive_header(block)
 
-    def schedule_download_single_block(self, downloader: "Node", block: Block, bandwidth: float) -> simpy.events.Process:
+    def schedule_download_single_block(self, downloader: "Node", block: Block, bandwidth: float,
+                                       fraction_already_dled: float = 0) -> simpy.events.Process:
         if not block.is_available:
             raise ValueError(f"block is not available! {block}")
 
         def download_task() -> Generator[simpy.events.Event, None, None]:
-            if bandwidth<=0: 
+            if bandwidth <= 0:
                 time_to_download = 0.0
             else:
-                time_to_download = 1/bandwidth
+                time_to_download = (1-fraction_already_dled)/bandwidth
             start_time = simulation_parameters.ENV.now
             try:
                 yield simulation_parameters.ENV.timeout(time_to_download)
                 downloader.download_complete(block)
             except simpy.exceptions.Interrupt as i:
                 elapsed_time = simulation_parameters.ENV.now - start_time
-                fraction_downloaded = elapsed_time*bandwidth
+                fraction_downloaded = elapsed_time*bandwidth + fraction_already_dled
                 downloader.download_interrupted(block, fraction_downloaded)
 
         return simulation_parameters.ENV.process(download_task())
