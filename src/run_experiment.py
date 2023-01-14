@@ -18,38 +18,46 @@ from block import Block
 
 
 import plotly.graph_objects as go  # type: ignore
+import plotly.express as px  # type: ignore
 
 
-def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
+def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_log: Dict[Node, List[Tuple[Block, float, float]]]) -> None:
     fig = go.Figure()
 
     width = 0.1
     height = 0.25
 
-    # Set axes ranges
-    fig.update_xaxes(range=[start_time - width, end_time + width])
-    fig.update_yaxes(range=[0 - height, num_nodes + height], dtick=1, tick0=1)
+    colors = px.colors.qualitative.Alphabet
+
+    # plot download rectangles
+    for node in download_log:
+        dl_list = download_log[node]
+        for block, start, end in dl_list:
+            if start > end_time:
+                break
+            if end < start_time:
+                continue
+            fig.add_shape(type="rect", xref="x", yref="y", x0=start, x1=end,
+                          y0=node.id-height, y1=node.id,
+                          fillcolor=colors[hash(block) % len(colors)], line=dict(color="black", width=1), opacity=0.2, layer="below")
+            fig.add_annotation(
+                x=(start+end)/2, y=node.id - height/2, xref='x', yref='y', text=str(block.id), opacity=0.5,
+                showarrow=False)
 
     # plotting of blocks using markers
     x_vals = [block.creation_time for block in Block.all_blocks if start_time <=
               block.creation_time <= end_time]
     y_vals = [block.miner.id if block.miner else 0 for block in Block.all_blocks if start_time <=
               block.creation_time <= end_time]
-    text = [str(block.height) for block in Block.all_blocks if start_time <=
+    text = [str(block.id) for block in Block.all_blocks if start_time <=
             block.creation_time <= end_time]
     fig.add_trace(go.Scatter(mode="markers+text", x=x_vals, y=y_vals, text=text, textposition="top center", marker_symbol="square",
                              marker_line_color="midnightblue", marker_color="lightskyblue",
-                             marker_line_width=2, marker_size=10,))
+                             marker_line_width=2, marker_size=10))
     for block in Block.all_blocks:
         miner_id = block.miner.id if block.miner else 0
 
         if start_time <= block.creation_time <= end_time:
-            # Alternative: draw a rectangle for the block
-            # fig.add_shape(type="rect", xref="x", yref="y", x0=block.creation_time - width,
-            #               x1=block.creation_time+width,
-            #               y0=miner_id-height, y1=miner_id+height, fillcolor="blue",)
-
-            # draw an arrow from the block to its parent
             if block.parent and block.parent.creation_time >= start_time:
                 parent_miner_id = block.parent.miner.id if block.parent.miner else 0
                 fig.add_annotation(
@@ -58,10 +66,13 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int) -> None:
                     xref='x', yref='y', axref='x', ayref='y', text='',
                     showarrow=True, arrowhead=3, arrowsize=1, arrowwidth=1, arrowcolor='black')
 
-    fig.update_layout(
-        xaxis_title="time (sec)",
-        yaxis_title="Node ID",
-    )
+    # Set axes ranges
+    fig.update_xaxes(
+        range=[start_time - width, end_time + width], showgrid=False, zeroline=False)
+    fig.update_yaxes(range=[0 - height, num_nodes -
+                     1 + height], dtick=1, tick0=1, showgrid=False, zeroline=False,
+                     tickvals=list(range(num_nodes)), ticktext=[f"Node {i}" for i in range(num_nodes)], tickmode="array")
+    fig.update_layout(xaxis_title="time (sec)")
     fig.show()
 
 
@@ -119,23 +130,38 @@ def setup_parser() -> argparse.ArgumentParser:
 
 class Experiment:
     def __init__(self, run_config: RunConfig) -> None:
-        self.network = Network()
-        self.nodes: List[Node] = []
-        if run_config.attacker_power:
-            self.nodes.append(DumbAttacker(
-                run_config.attacker_power, self.network))
-        self.nodes += [HonestNode(mining_rate=run_config.honest_block_rate,
-                                  bandwidth=run_config.bandwidth,
-                                  header_delay=run_config.header_delay,
-                                  network=self.network)
-                       for _ in range(run_config.num_honest)]
-        self.mining_oracle = PoWMiningOracle(self.nodes)
-        self.run_time = run_config.run_time
-        setup_progress_bar(self.run_time)
+        self.__config = run_config
 
-    def run_experiment(self) -> None:
+        self.__download_log: Optional[Dict[Node,
+                                           List[Tuple[Block, float, float]]]] = None
+        if self.__config.plot:
+            self.__download_log = {}
+
+        self.__network = Network(self.__download_log)
+        self.__nodes: List[Node] = []
+
+        if run_config.attacker_power:
+            self.__nodes.append(DumbAttacker(
+                run_config.attacker_power, self.__network))
+
+        self.__nodes += [HonestNode(mining_rate=run_config.honest_block_rate,
+                                    bandwidth=run_config.bandwidth,
+                                    header_delay=run_config.header_delay,
+                                    network=self.__network)
+                         for _ in range(run_config.num_honest)]
+
+        self.__mining_oracle = PoWMiningOracle(self.__nodes)
+        self.__run_time = run_config.run_time
+
+    def run_experiment(self, progress_bar: bool = True) -> None:
         """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
-        simulation_parameters.ENV.run(until=self.run_time)
+        if progress_bar:
+            setup_progress_bar(self.__run_time)
+        simulation_parameters.ENV.run(until=self.__run_time)
+        if self.__download_log is not None:
+            plot_timeline(
+                start_time=args.plot[0], end_time=args.plot[1],
+                num_nodes=args.num_honest[0], download_log=self.__download_log)
 
 
 def setup_progress_bar(run_time: float, num_updates: int = 100) -> None:
@@ -190,7 +216,3 @@ if __name__ == "__main__":
         json.dump(result, args.saveResults[0], indent=2)
     else:
         json.dump(result, sys.stdout, indent=2)
-
-    if args.plot:
-        plot_timeline(
-            start_time=args.plot[0], end_time=args.plot[1], num_nodes=args.num_honest[0])

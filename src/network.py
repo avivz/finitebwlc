@@ -10,12 +10,9 @@ if TYPE_CHECKING:
 
 
 class Network:
-    def __init__(self, log_downloads: bool = False) -> None:
+    def __init__(self, download_log: Optional[Dict["Node", List[Tuple[Block, float, float]]]]) -> None:
         self.__nodes: List[Node] = []
-        self.__download_log: Optional[Dict[Node,
-                                           List[Tuple[Block, float, float]]]] = None
-        if log_downloads:
-            self.__download_log = {}
+        self.__download_log = download_log
 
     def connect(self, node: "Node") -> None:
         self.__nodes.append(node)

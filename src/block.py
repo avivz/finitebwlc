@@ -4,12 +4,10 @@ if TYPE_CHECKING:
 
 
 class Block:
-    __next_id: ClassVar[int] = 0
     all_blocks: ClassVar[List["Block"]] = []
+    blocks_by_height: ClassVar[List[int]] = []
 
     def __init__(self, miner: Optional["Node"], parent: Optional["Block"], creation_time: float):
-        self.__id = Block.__next_id
-        Block.__next_id += 1
         Block.all_blocks.append(self)
 
         self.__parent = parent
@@ -22,6 +20,14 @@ class Block:
             self.__height: int = parent.__height+1
         else:
             self.__height = 0
+
+        if self.__height >= len(Block.blocks_by_height):
+            Block.blocks_by_height.append(1)
+        else:
+            Block.blocks_by_height[self.__height] += 1
+
+        self.__id = f"{self.__height}.{Block.blocks_by_height[self.__height]}"
+        self.__hash = hash(self.__id)
 
         self.__description = f"Block(id={self.id}, h={self.height}, parent_id={self.parent.id if self.parent else None}, creation_time={self.__creation_time})"
 
@@ -50,14 +56,14 @@ class Block:
         return self.__parent
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         return self.__id
 
     def children_iter(self) -> Iterator["Block"]:
         yield from self.__children
 
     def __hash__(self) -> int:
-        return self.__id
+        return self.__hash
 
     def __str__(self) -> str:
         return self.__description
