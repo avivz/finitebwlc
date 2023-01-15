@@ -9,3 +9,4 @@ tqdm
 types-tqdm
 pylru
 snakeviz
+kaleido
