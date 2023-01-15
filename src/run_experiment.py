@@ -123,7 +123,7 @@ def setup_parser() -> argparse.ArgumentParser:
     parser.add_argument('--header_delay', nargs=1, required=True, type=float,
                         help="header_delay header delay of each honest node")
 
-    parser.add_argument('--saveResults', nargs=1, type=argparse.FileType('w'),
+    parser.add_argument('--saveResults', nargs=1, type=str,
                         help="filename (Where to save the results of the simulation)")
     return parser
 
@@ -213,6 +213,8 @@ if __name__ == "__main__":
 
     # write the results to stdout or file:
     if args.saveResults:
-        json.dump(result, args.saveResults[0], indent=2)
+        file_name = args.saveResults[0]
+        with open(file_name, 'w') as out_file:
+            json.dump(result, out_file, indent=2)
     else:
         json.dump(result, sys.stdout, indent=2)
