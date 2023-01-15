@@ -27,8 +27,8 @@ OUTPUT_PATH = os.path.join(BASE_PATH, "experiment_honest_growth/data/")
 base_arguments = ["--run_time 10000", "--num_honest 100",
                   "--pow_honest 0.01"]  # "--header_delay 0"  "--bandwidth -1"
 
-bandwidth_range = numpy.arange(0.1, 4.2, 0.05)
-num_repetitions = 10
+bandwidth_range = numpy.arange(0.05, 2, 0.05)
+num_repetitions = 100
 
 parser = setup_parser()
 args = parser.parse_args()

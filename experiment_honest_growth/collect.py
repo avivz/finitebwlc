@@ -7,6 +7,7 @@ import plotly.express as px  # type: ignore
 import plotly.graph_objects as go  # type:ignore
 import numpy as np
 import math
+import tqdm
 
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 PYTHON_PATH = "python"
@@ -17,7 +18,7 @@ delay_data: Dict[float, List[float]] = dict()
 
 # read data from files
 print("Reading files...")
-for file_name in os.listdir(DATA_PATH):
+for file_name in tqdm.tqdm(os.listdir(DATA_PATH)):
     if not file_name.endswith(".json"):
         continue
     try:
@@ -56,7 +57,7 @@ delay_growth_values = [sum(delay_data[delay])/len(delay_data[delay])
 delay_error_values = [np.std(delay_data[delay]) /
                       math.sqrt(len(delay_data[delay])) for delay in delay_values]
 
-
+print("Max stdev:", max(bw_error_values), max(delay_error_values))
 print("Creating plot...")
 draw_type = ["Bandwidth Limits"]*len(bw_values) + \
     ["Constant Delay"]*len(adjusted_delay_values)
