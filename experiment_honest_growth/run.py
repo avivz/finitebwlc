@@ -33,6 +33,9 @@ num_repetitions = 10
 parser = setup_parser()
 args = parser.parse_args()
 
+num_skipped = 0
+num_ran = 0
+
 for index, bandwidth in enumerate(bandwidth_range):
     for rep in range(num_repetitions):
         file_name1 = os.path.join(
@@ -59,11 +62,17 @@ for index, bandwidth in enumerate(bandwidth_range):
 
         if os.path.exists(file_name1) and os.path.getsize(file_name1) > 0:
             print(f"SKIPPING {file_name1}")
+            num_skipped += 1
         else:
             print(f"{index}: RUNNING: {cmd1}")
             os.system(cmd1)
+            num_ran += 1
         if os.path.exists(file_name2) and os.path.getsize(file_name2) > 0:
             print(f"SKIPPING {file_name2}")
+            num_skipped += 1
         else:
             print(f"{index}: RUNNING: {cmd2}")
             os.system(cmd2)
+            num_ran += 1
+
+print(f"\n\nskipped: {num_skipped}, ran: {num_ran}.")
