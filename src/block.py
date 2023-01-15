@@ -59,8 +59,8 @@ class Block:
     def id(self) -> str:
         return self.__id
 
-    def children_iter(self) -> Iterator["Block"]:
-        yield from self.__children
+    def get_children(self) -> List["Block"]:
+        return self.__children[:]
 
     def __hash__(self) -> int:
         return self.__hash

@@ -15,6 +15,7 @@ from mining_oracle import PoWMiningOracle
 from network import Network
 import simulation_parameters
 from block import Block
+from teasing_attacker import TeasingAttacker
 
 
 import plotly.graph_objects as go  # type: ignore
@@ -83,7 +84,9 @@ class RunConfig:
     honest_block_rate: float
     bandwidth: float
     header_delay: float
-    attacker_power: float
+    dumb_attacker: float
+    teasing_attacker: float
+    attacker_head_start: int
     plot: Optional[Tuple[float, float]]
 
 
@@ -105,8 +108,17 @@ def setup_parser() -> argparse.ArgumentParser:
     parser.add_argument('--plot', nargs=2, type=int, metavar=('START', 'END'),
                         help="plot a block diagram from <START> to <END> times")  # on/off flag
 
-    parser.add_argument('--attacker_power', metavar="MINING_POWER",
-                        help="include an attacker with the given mining power (defaults to no attacker)", type=float, default=0)  # on/off flag
+    parser.add_argument('--dumb_attacker', metavar="MINING_POWER",
+                        help="include an attacker with the given mining power (defaults to no attacker)",
+                        type=float, default=0)  # on/off flag
+
+    parser.add_argument('--teasing_attacker', metavar="MINING_POWER", type=float,
+                        help="include a teasing attacker with the given mining power (defaults to no attacker)",
+                        default=0)  # on/off flag
+
+    parser.add_argument('--attacker_head_start', metavar="NUM_BLOCKS", type=int,
+                        help="give any attacker NUM_BLOCKS mining at the begining of the simulation. This only matters if an attacker is present.",
+                        default=0)  # on/off flag
 
     parser.add_argument('--run_time', nargs=1, required=True, type=float,
                         help="time to run")
@@ -140,9 +152,18 @@ class Experiment:
         self.__network = Network(self.__download_log)
         self.__nodes: List[Node] = []
 
-        if run_config.attacker_power:
-            self.__nodes.append(DumbAttacker(
-                run_config.attacker_power, self.__network))
+        if run_config.dumb_attacker:
+            attacker = DumbAttacker(run_config.dumb_attacker, self.__network)
+            self.__nodes.append(attacker)
+            for i in range(run_config.attacker_head_start):
+                attacker.mine_block()
+
+        if run_config.teasing_attacker:
+            attacker2 = TeasingAttacker(
+                run_config.teasing_attacker, self.__network)
+            self.__nodes.append(attacker2)
+            for i in range(run_config.attacker_head_start):
+                attacker2.mine_block()
 
         self.__nodes += [HonestNode(mining_rate=run_config.honest_block_rate,
                                     bandwidth=run_config.bandwidth,
@@ -161,7 +182,7 @@ class Experiment:
         if self.__download_log is not None:
             plot_timeline(
                 start_time=args.plot[0], end_time=args.plot[1],
-                num_nodes=args.num_honest[0], download_log=self.__download_log)
+                num_nodes=len(self.__nodes), download_log=self.__download_log)
 
 
 def setup_progress_bar(run_time: float, num_updates: int = 100) -> None:
@@ -198,7 +219,9 @@ if __name__ == "__main__":
         honest_block_rate=args.pow_honest[0],
         bandwidth=args.bandwidth[0],
         header_delay=args.header_delay[0],
-        attacker_power=args.attacker_power,
+        dumb_attacker=args.dumb_attacker,
+        teasing_attacker=args.teasing_attacker,
+        attacker_head_start=args.attacker_head_start,
         plot=args.plot if args.plot else None
     )
 
