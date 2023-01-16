@@ -9,7 +9,7 @@ import tqdm
 
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 PYTHON_PATH = "python"
-DATA_PATH = os.path.join(BASE_PATH, "exper_teaser/data/")
+DATA_PATH = os.path.join(os.path.split(os.path.abspath(__file__))[0], "data/")
 
 data: Dict[Tuple[float, bool], List[float]] = dict()
 
@@ -40,7 +40,7 @@ print("Computing traces...")
 records: List[Dict[str, Any]] = [
     {
         "bandwidth": record[0],
-        "attacker":"active attacker" if record[1] else "no attacker",
+        "attacker": "active attacker" if record[1] else "no attacker",
         "chain growth": sum(data[record]) / len(data[record]),
         "stdev": np.std(data[record])
     } for record in sorted(list(data))
