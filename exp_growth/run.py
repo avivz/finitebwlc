@@ -32,7 +32,7 @@ if not os.path.exists(OUTPUT_PATH):
 base_arguments = [f"--{RunConfig.RUN_TIME} 10000", f"--{RunConfig.NUM_HONEST} 100", f"--{RunConfig.MODE} pow",
                   f"--{RunConfig.HONEST_BLOCK_RATE} 0.01"]
 
-bandwidth_range = numpy.arange(0.05, 2, 0.05)
+bandwidth_range = numpy.arange(0.05, 2.01, 0.05)
 num_repetitions = 100
 
 parser = setup_parser()

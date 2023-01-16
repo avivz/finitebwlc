@@ -6,6 +6,7 @@ import plotly.express as px  # type: ignore
 import plotly.graph_objects as go  # type:ignore
 import numpy as np
 import tqdm
+import csv
 
 BASE_PATH = os.path.split(os.path.abspath(__file__))[0]
 PYTHON_PATH = "python"
@@ -66,10 +67,21 @@ fig.update_layout(legend=dict(
     x=0.02
 ))
 
-out_path = os.path.join(BASE_PATH, "images/")
-out_file = os.path.join(out_path, "fig1.svg")
+out_path = os.path.join(BASE_PATH, "results/")
+out_file = os.path.join(out_path, "fig_exp_teaser.svg")
 
-print("Saving plot...")
+print(f"Saving plot to {out_file}")
 if not os.path.exists(out_path):
     os.mkdir(out_path)
 fig.write_image(out_file)
+
+csv_file = os.path.join(out_path, "exp_teaser.csv")
+
+print(f"Saving csv to {csv_file}")
+
+with open(csv_file, 'w') as csvfile:
+    csv_writer = csv.writer(csvfile)
+    csv_writer.writerow(["x_bandwidth", "y_chain_growth", "attacker"])
+    for record in records:
+        csv_writer.writerow(
+            [record["bandwidth"], record["chain growth"], record["attacker"]])

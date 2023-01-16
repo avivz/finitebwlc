@@ -31,7 +31,7 @@ OUTPUT_PATH = os.path.join(os.path.split(
 base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
                   f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
 
-bandwidth_range = numpy.arange(0.05, 2, 0.05)
+bandwidth_range = numpy.arange(0.05, 2.01, 0.05)
 num_repetitions = 100
 
 parser = setup_parser()
