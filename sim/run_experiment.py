@@ -13,7 +13,7 @@ from .dumb_attacker import DumbAttacker
 from .node import Node
 from .mining_oracle import PoWMiningOracle, PoSMiningOracle
 from .network import Network
-import src.simulation_parameters as simulation_parameters
+import sim.simulation_parameters as simulation_parameters
 from .block import Block
 from .teasing_pow_attacker import TeasingPoWAttacker
 from .configuration import RunConfig

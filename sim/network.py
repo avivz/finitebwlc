@@ -4,7 +4,7 @@ from .block import Block
 import simpy.events
 import simpy.core
 import simpy.exceptions
-import src.simulation_parameters as simulation_parameters
+import sim.simulation_parameters as simulation_parameters
 if TYPE_CHECKING:
     from node import Node
 

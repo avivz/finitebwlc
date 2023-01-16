@@ -5,12 +5,11 @@ from typing import Dict, List, Tuple, Any
 import plotly.express as px  # type: ignore
 import plotly.graph_objects as go  # type:ignore
 import numpy as np
-import math
 import tqdm
 
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 PYTHON_PATH = "python"
-DATA_PATH = os.path.join(BASE_PATH, "experiment_teasing_attacker/data/")
+DATA_PATH = os.path.join(BASE_PATH, "exper_teaser/data/")
 
 data: Dict[Tuple[float, bool], List[float]] = dict()
 

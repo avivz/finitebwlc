@@ -1,6 +1,6 @@
 from typing import List, Iterator, Optional, ClassVar, TYPE_CHECKING
 if TYPE_CHECKING:
-    from node import Node
+    from .node import Node
 
 
 class Block:

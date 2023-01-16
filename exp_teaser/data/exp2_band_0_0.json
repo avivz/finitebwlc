@@ -1,0 +1,18 @@
+{
+  "config": {
+    "mode": "pow",
+    "pos_round_length": 1,
+    "run_time": 10000.0,
+    "num_honest": 100,
+    "honest_block_rate": 0.01,
+    "bandwidth": 0.05,
+    "header_delay": 0.0,
+    "dumb_attacker": 0,
+    "teasing_attacker": 0,
+    "attacker_head_start": 0,
+    "plot": null,
+    "save_results": "/cs/staff/avivz/finitebw/experiment_teasing_attacker/data/exp2_band_0_0.json",
+    "verbose": false
+  },
+  "honest_chain_height": 286
+}

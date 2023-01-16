@@ -1,8 +1,8 @@
 
 from .block import Block
 from .node import Node
-import src.network as network
-import src.simulation_parameters as simulation_parameters
+import sim.network as network
+import sim.simulation_parameters as simulation_parameters
 
 
 class DumbAttacker(Node):

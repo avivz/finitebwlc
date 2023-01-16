@@ -4,7 +4,7 @@ import random
 import simpy.core
 import simpy.events
 import numpy.random
-import src.simulation_parameters as simulation_parameters
+import sim.simulation_parameters as simulation_parameters
 
 
 class PoWMiningOracle:
