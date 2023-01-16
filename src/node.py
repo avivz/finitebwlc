@@ -1,10 +1,10 @@
 
 from abc import ABC
 from typing import Set, ClassVar, Optional
-from block import Block
-import network
+from .block import Block
+import src.network as network
 import simpy.events
-import simulation_parameters
+import src.simulation_parameters as simulation_parameters
 import logging
 import pylru  # type: ignore
 

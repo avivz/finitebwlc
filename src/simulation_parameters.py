@@ -1,5 +1,5 @@
 import simpy.core
-from block import Block
+from src.block import Block
 
 # Globally available constants and simulation parameters
 ENV = simpy.core.Environment()

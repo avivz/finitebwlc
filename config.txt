@@ -1,5 +1,5 @@
 --run_time 100
 --num_honest 5 
---pow_honest 0.2 
+--honest_block_rate 0.2 
 --bandwidth 1.1
 --header_delay 0 

@@ -1,9 +1,9 @@
 
 from typing import Optional
-from block import Block
-from node import Node
-import network
-from limitted_queue import LimittedQueue
+from .block import Block
+from .node import Node
+import src.network as network
+from .limitted_queue import LimittedQueue
 
 
 class HonestNode(Node):

@@ -1,10 +1,10 @@
-from node import Node
+from .node import Node
 from typing import List, Generator
 import random
 import simpy.core
 import simpy.events
 import numpy.random
-import simulation_parameters
+import src.simulation_parameters as simulation_parameters
 
 
 class PoWMiningOracle:

@@ -1,10 +1,10 @@
 
 from typing import List, Generator, TYPE_CHECKING, Dict, Tuple, Optional
-from block import Block
+from .block import Block
 import simpy.events
 import simpy.core
 import simpy.exceptions
-import simulation_parameters
+import src.simulation_parameters as simulation_parameters
 if TYPE_CHECKING:
     from node import Node
 

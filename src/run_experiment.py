@@ -8,14 +8,15 @@ import json
 import tqdm
 import simpy
 
-from honest_node import HonestNode
-from dumb_attacker import DumbAttacker
-from node import Node
-from mining_oracle import PoWMiningOracle, PoSMiningOracle
-from network import Network
-import simulation_parameters
-from block import Block
-from teasing_pow_attacker import TeasingPoWAttacker
+from .honest_node import HonestNode
+from .dumb_attacker import DumbAttacker
+from .node import Node
+from .mining_oracle import PoWMiningOracle, PoSMiningOracle
+from .network import Network
+import src.simulation_parameters as simulation_parameters
+from .block import Block
+from .teasing_pow_attacker import TeasingPoWAttacker
+from .configuration import RunConfig
 
 
 import plotly.graph_objects as go  # type: ignore
@@ -77,21 +78,6 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
     fig.show()
 
 
-@dataclasses.dataclass
-class RunConfig:
-    mode: str
-    pos_round_length: float
-    run_time: float
-    num_honest: int
-    honest_block_rate: float
-    bandwidth: float
-    header_delay: float
-    dumb_attacker: float
-    teasing_attacker: float
-    attacker_head_start: int
-    plot: Optional[Tuple[float, float]]
-
-
 class MyParser(argparse.ArgumentParser):
     @staticmethod
     def convert_arg_line_to_args(arg_line: str) -> List[str]:
@@ -104,47 +90,47 @@ def setup_parser() -> argparse.ArgumentParser:
         description='Run a basic experiment of the mining simulation.\nSpecify a configuration file with @<filename>.',
         fromfile_prefix_chars='@')
 
-    parser.add_argument('-v', '--verbose',
+    parser.add_argument("--" + RunConfig.VERBOSE,
                         action='store_true', help="print events to stdout")
 
-    parser.add_argument('--plot', nargs=2, type=int, metavar=('START', 'END'),
+    parser.add_argument('--' + RunConfig.PLOT, nargs=2, type=int, metavar=('START', 'END'),
                         help="plot a block diagram from <START> to <END> times")
 
-    parser.add_argument(
-        '--mode', choices=['pos', 'pow'], help="which mode of operation we are using", required=True)
+    parser.add_argument("--" + RunConfig.MODE, choices=[
+                        'pos', 'pow'], help="which mode of operation we are using", required=True)
 
-    parser.add_argument('--pos_round_length', metavar="SECs",
+    parser.add_argument("--" + RunConfig.POS_ROUND_LENGTH, metavar="SECs",
                         help="How long the mining round is in PoS (valid only in PoS mode, defaults to 1sec)",
                         type=float, default=1)
 
-    parser.add_argument('--dumb_attacker', metavar="MINING_POWER",
+    parser.add_argument("--" + RunConfig.DUMB_ATTACKER, metavar="MINING_POWER",
                         help="include an attacker with the given mining power (defaults to no attacker)",
                         type=float, default=0)
 
-    parser.add_argument('--teasing_attacker', metavar="MINING_POWER", type=float,
+    parser.add_argument("--" + RunConfig.TEASING_ATTACKER, metavar="MINING_POWER", type=float,
                         help="include a teasing attacker with the given mining power (defaults to no attacker)",
                         default=0)
 
-    parser.add_argument('--attacker_head_start', metavar="NUM_BLOCKS", type=int,
+    parser.add_argument("--" + RunConfig.ATTACKER_HEAD_START, metavar="NUM_BLOCKS", type=int,
                         help="give any attacker NUM_BLOCKS mining at the begining of the simulation. This only matters if an attacker is present.",
                         default=0)
 
-    parser.add_argument('--run_time', nargs=1, required=True, type=float,
+    parser.add_argument("--" + RunConfig.RUN_TIME, default=100, required=True, type=float,
                         help="time to run")
 
-    parser.add_argument('--num_honest', nargs=1, required=True, type=int,
+    parser.add_argument("--" + RunConfig.NUM_HONEST, default=10, required=True, type=int,
                         help="number of honest nodes")
 
-    parser.add_argument('--pow_honest', nargs=1, required=True, type=float,
+    parser.add_argument("--" + RunConfig.HONEST_BLOCK_RATE, default=0.1, required=True, type=float,
                         help="mining power of each honest node")
 
-    parser.add_argument('--bandwidth', nargs=1, required=True, type=float,
+    parser.add_argument("--" + RunConfig.BANDWIDTH, default=1, required=True, type=float,
                         help="bandwidth of each honest node")
 
-    parser.add_argument('--header_delay', nargs=1, required=True, type=float,
+    parser.add_argument("--" + RunConfig.HEADER_DELAY, default=0, required=True, type=float,
                         help="header_delay header delay of each honest node")
 
-    parser.add_argument('--saveResults', nargs=1, type=str,
+    parser.add_argument('--' + RunConfig.SAVE_RESULTS, default="", type=str,
                         help="filename (Where to save the results of the simulation)")
     return parser
 
@@ -184,6 +170,7 @@ class Experiment:
             self.__mining_oracle: Union[PoWMiningOracle,
                                         PoSMiningOracle] = PoWMiningOracle(self.__nodes)
         else:
+            print(run_config.pos_round_length)
             self.__mining_oracle = PoSMiningOracle(
                 self.__nodes, run_config.pos_round_length)
         self.__run_time = run_config.run_time
@@ -193,9 +180,10 @@ class Experiment:
         if progress_bar:
             setup_progress_bar(self.__run_time)
         simulation_parameters.ENV.run(until=self.__run_time)
-        if self.__download_log is not None:
+        if self.__config.plot is not None:
+            assert self.__download_log is not None
             plot_timeline(
-                start_time=args.plot[0], end_time=args.plot[1],
+                start_time=self.__config.plot[0], end_time=self.__config.plot[1],
                 num_nodes=len(self.__nodes), download_log=self.__download_log)
 
 
@@ -217,29 +205,16 @@ def calc_honest_chain_height() -> int:
 
 if __name__ == "__main__":
     parser = setup_parser()
-    args = parser.parse_args()
+    run_config = RunConfig()
+    parser.parse_args(namespace=run_config)
 
-    if args.verbose:
+    if run_config.verbose:
         logger = logging.getLogger("SIM_INFO")
         logger.setLevel(logging.INFO)
 
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging.INFO)
         logger.addHandler(handler)
-
-    run_config = RunConfig(
-        mode=args.mode,
-        pos_round_length=args.pos_round_length,
-        run_time=args.run_time[0],
-        num_honest=args.num_honest[0],
-        honest_block_rate=args.pow_honest[0],
-        bandwidth=args.bandwidth[0],
-        header_delay=args.header_delay[0],
-        dumb_attacker=args.dumb_attacker,
-        teasing_attacker=args.teasing_attacker,
-        attacker_head_start=args.attacker_head_start,
-        plot=args.plot if args.plot else None
-    )
 
     experiment = Experiment(run_config)
     experiment.run_experiment()
@@ -251,8 +226,8 @@ if __name__ == "__main__":
     result["honest_chain_height"] = honest_chain_height
 
     # write the results to stdout or file:
-    if args.saveResults:
-        file_name = args.saveResults[0]
+    if run_config.save_results:
+        file_name = run_config.save_results
         with open(file_name, 'w') as out_file:
             json.dump(result, out_file, indent=2)
     else:
