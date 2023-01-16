@@ -61,7 +61,7 @@ class Node(ABC):
         """This method is called externally by the mining oracle.
         the block is mined on top of the current mining target, and the mining target is adjusted to the new block"""
         block = Block(self, self._mining_target,
-                      simulation_parameters.ENV.now)
+                      simulation_parameters.ENV.now, round)
         message = f"Mining t={simulation_parameters.ENV.now:.2f}: Node {self} mines block {block}"
         logging.getLogger("SIM_INFO").info(message)
 
