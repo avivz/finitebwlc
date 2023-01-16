@@ -9,9 +9,10 @@ import numpy as np
 import math
 import tqdm
 
-BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
+BASE_PATH = os.path.split(os.path.abspath(__file__))[0]
+print(BASE_PATH)
 PYTHON_PATH = "python"
-DATA_PATH = os.path.join(os.path.split(os.path.abspath(__file__))[0], "data/")
+DATA_PATH = os.path.join(BASE_PATH, "data/")
 
 bandwidth_data: Dict[float, List[float]] = dict()
 delay_data: Dict[float, List[float]] = dict()
