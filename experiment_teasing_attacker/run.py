@@ -21,14 +21,14 @@ def setup_parser() -> argparse.ArgumentParser:
 
 
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
-SIMULATION_PATH = os.path.join(BASE_PATH, "src/run_experiment.py")
+SIMULATION_MODULE = "src.run_experiment"
 
 PYTHON_PATH = "python"
 
 OUTPUT_PATH = os.path.join(BASE_PATH, "experiment_teasing_attacker/data/")
 
 base_arguments = [f"--{src.configuration.RunConfig.RUN_TIME} 10000", f"--{src.configuration.RunConfig.NUM_HONEST} 100", f"--{src.configuration.RunConfig.MODE} pow",
-                  f"--{src.configuration.RunConfig.honest_block_rate} 0.01", f"--{src.configuration.RunConfig.header_delay} 0"]
+                  f"--{src.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{src.configuration.RunConfig.HEADER_DELAY} 0"]
 
 bandwidth_range = numpy.arange(0.05, 2, 0.05)
 num_repetitions = 100
@@ -57,8 +57,8 @@ for index, bandwidth in enumerate(bandwidth_range):
             [f"--{src.configuration.RunConfig.SAVE_RESULTS} {file_name2}",
                 f"--{src.configuration.RunConfig.TEASING_ATTACKER} 1.0", f"--{src.configuration.RunConfig.ATTACKER_HEAD_START} 100"]
 
-        cmd1 = f"{PYTHON_PATH} {SIMULATION_PATH} {' '.join(arguments1)}"
-        cmd2 = f"{PYTHON_PATH} {SIMULATION_PATH} {' '.join(arguments2)}"
+        cmd1 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments1)}"
+        cmd2 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments2)}"
 
         if os.path.exists(file_name1) and os.path.getsize(file_name1) > 0:
             print(f"SKIPPING {file_name1}")
