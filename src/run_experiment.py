@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Generator, Optional, Tuple, Any, Dict
+from typing import List, Generator, Optional, Tuple, Any, Dict, Union
 
 import argparse
 import logging
@@ -11,7 +11,7 @@ import simpy
 from honest_node import HonestNode
 from dumb_attacker import DumbAttacker
 from node import Node
-from mining_oracle import PoWMiningOracle
+from mining_oracle import PoWMiningOracle, PoSMiningOracle
 from network import Network
 import simulation_parameters
 from block import Block
@@ -79,6 +79,8 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
 
 @dataclasses.dataclass
 class RunConfig:
+    mode: str
+    pos_round_length: float
     run_time: float
     num_honest: int
     honest_block_rate: float
@@ -103,22 +105,29 @@ def setup_parser() -> argparse.ArgumentParser:
         fromfile_prefix_chars='@')
 
     parser.add_argument('-v', '--verbose',
-                        action='store_true', help="print events to stdout")  # on/off flag
+                        action='store_true', help="print events to stdout")
 
     parser.add_argument('--plot', nargs=2, type=int, metavar=('START', 'END'),
-                        help="plot a block diagram from <START> to <END> times")  # on/off flag
+                        help="plot a block diagram from <START> to <END> times")
+
+    parser.add_argument(
+        '--mode', choices=['pos', 'pow'], help="which mode of operation we are using", required=True)
+
+    parser.add_argument('--pos_round_length', metavar="SECs",
+                        help="How long the mining round is in PoS (valid only in PoS mode, defaults to 1sec)",
+                        type=float, default=1)
 
     parser.add_argument('--dumb_attacker', metavar="MINING_POWER",
                         help="include an attacker with the given mining power (defaults to no attacker)",
-                        type=float, default=0)  # on/off flag
+                        type=float, default=0)
 
     parser.add_argument('--teasing_attacker', metavar="MINING_POWER", type=float,
                         help="include a teasing attacker with the given mining power (defaults to no attacker)",
-                        default=0)  # on/off flag
+                        default=0)
 
     parser.add_argument('--attacker_head_start', metavar="NUM_BLOCKS", type=int,
                         help="give any attacker NUM_BLOCKS mining at the begining of the simulation. This only matters if an attacker is present.",
-                        default=0)  # on/off flag
+                        default=0)
 
     parser.add_argument('--run_time', nargs=1, required=True, type=float,
                         help="time to run")
@@ -171,7 +180,12 @@ class Experiment:
                                     network=self.__network)
                          for _ in range(run_config.num_honest)]
 
-        self.__mining_oracle = PoWMiningOracle(self.__nodes)
+        if run_config.mode == "pow":
+            self.__mining_oracle: Union[PoWMiningOracle,
+                                        PoSMiningOracle] = PoWMiningOracle(self.__nodes)
+        else:
+            self.__mining_oracle = PoSMiningOracle(
+                self.__nodes, run_config.pos_round_length)
         self.__run_time = run_config.run_time
 
     def run_experiment(self, progress_bar: bool = True) -> None:
@@ -214,6 +228,8 @@ if __name__ == "__main__":
         logger.addHandler(handler)
 
     run_config = RunConfig(
+        mode=args.mode,
+        pos_round_length=args.pos_round_length,
         run_time=args.run_time[0],
         num_honest=args.num_honest[0],
         honest_block_rate=args.pow_honest[0],

@@ -26,7 +26,7 @@ PYTHON_PATH = "python"
 
 OUTPUT_PATH = os.path.join(BASE_PATH, "experiment_teasing_attacker/data/")
 
-base_arguments = ["--run_time 10000", "--num_honest 100",
+base_arguments = ["--run_time 10000", "--num_honest 100", "--mode pow"
                   "--pow_honest 0.01", "--header_delay 0"]
 
 bandwidth_range = numpy.arange(0.05, 2, 0.05)
