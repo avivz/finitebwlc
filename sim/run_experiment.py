@@ -170,7 +170,6 @@ class Experiment:
             self.__mining_oracle: Union[PoWMiningOracle,
                                         PoSMiningOracle] = PoWMiningOracle(self.__nodes)
         else:
-            print(run_config.pos_round_length)
             self.__mining_oracle = PoSMiningOracle(
                 self.__nodes, run_config.pos_round_length)
         self.__run_time = run_config.run_time
