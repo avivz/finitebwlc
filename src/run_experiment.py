@@ -15,7 +15,7 @@ from mining_oracle import PoWMiningOracle
 from network import Network
 import simulation_parameters
 from block import Block
-from teasing_attacker import TeasingAttacker
+from teasing_pow_attacker import TeasingPoWAttacker
 
 
 import plotly.graph_objects as go  # type: ignore
@@ -159,7 +159,7 @@ class Experiment:
                 attacker.mine_block()
 
         if run_config.teasing_attacker:
-            attacker2 = TeasingAttacker(
+            attacker2 = TeasingPoWAttacker(
                 run_config.teasing_attacker, self.__network)
             self.__nodes.append(attacker2)
             for i in range(run_config.attacker_head_start):

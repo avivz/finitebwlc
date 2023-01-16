@@ -6,7 +6,7 @@ import network
 import simulation_parameters
 
 
-class TeasingAttacker(Node):
+class TeasingPoWAttacker(Node):
     """this attacker mines on its own chain. As it receives blocks from the network, 
     it always releases 2 headers ahead but allows download only one header ahead
     thus, a node that downloads towards the longest tip always first downloads the matching block of this attacker."""
