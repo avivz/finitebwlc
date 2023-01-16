@@ -4,15 +4,15 @@ from .block import Block
 import simpy.events
 import simpy.core
 import simpy.exceptions
-import sim.simulation_parameters as simulation_parameters
 if TYPE_CHECKING:
     from .node import Node
 
 
 class Network:
-    def __init__(self, download_log: Optional[Dict["Node", List[Tuple[Block, float, float]]]]) -> None:
+    def __init__(self, env: simpy.core.Environment, download_log: Optional[Dict["Node", List[Tuple[Block, float, float]]]]) -> None:
         self.__nodes: List[Node] = []
         self.__download_log = download_log
+        self.__env = env
 
     def connect(self, node: "Node") -> None:
         self.__nodes.append(node)
@@ -23,9 +23,9 @@ class Network:
         for node in self.__nodes:
             if node is not sender:
                 def task(node: "Node", block: Block) -> Generator[simpy.events.Event, None, None]:
-                    yield simulation_parameters.ENV.timeout(node.header_delay)
+                    yield self.__env.timeout(node.header_delay)
                     node.receive_header(block)
-                simulation_parameters.ENV.process(task(node, block))
+                self.__env.process(task(node, block))
 
     def schedule_download_single_block(self, downloader: "Node", block: Block, bandwidth: float,
                                        fraction_already_dled: float) -> simpy.events.Process:
@@ -37,21 +37,21 @@ class Network:
                 time_to_download = 0.0
             else:
                 time_to_download = (1-fraction_already_dled)/bandwidth
-            start_time = simulation_parameters.ENV.now
+            start_time = self.__env.now
             try:
-                yield simulation_parameters.ENV.timeout(time_to_download)
+                yield self.__env.timeout(time_to_download)
                 downloader.download_complete(block)
             except simpy.exceptions.Interrupt as i:
-                elapsed_time = simulation_parameters.ENV.now - start_time
+                elapsed_time = self.__env.now - start_time
                 fraction_downloaded = elapsed_time*bandwidth + fraction_already_dled
                 downloader.download_interrupted(block, fraction_downloaded)
             finally:
                 if self.__download_log:
-                    end_time = simulation_parameters.ENV.now
+                    end_time = self.__env.now
                     self.__download_log[downloader].append(
                         (block, float(start_time), float(end_time)))
 
-        return simulation_parameters.ENV.process(download_task())
+        return self.__env.process(download_task())
 
     @property
     def download_log(self) -> Optional[Dict["Node", List[Tuple[Block, float, float]]]]:

@@ -14,7 +14,6 @@ from .dumb_attacker import DumbAttacker
 from .node import Node
 from .mining_oracle import PoWMiningOracle, PoSMiningOracle
 from .network import Network
-import sim.simulation_parameters as simulation_parameters
 from .block import Block
 from .teasing_pow_attacker import TeasingPoWAttacker
 from .configuration import RunConfig
@@ -154,29 +153,35 @@ def setup_parser() -> argparse.ArgumentParser:
 class Experiment:
     def __init__(self, run_config: RunConfig) -> None:
         self.__config = run_config
+        self.__env = simpy.core.Environment()
+        # pass the environment to the nodes for logging purposes.
+        Node.env = self.__env
 
         self.__download_log: Optional[Dict[Node,
                                            List[Tuple[Block, float, float]]]] = None
         if self.__config.plot:
             self.__download_log = {}
 
-        self.__network = Network(self.__download_log)
+        self.__network = Network(self.__env, self.__download_log)
         self.__nodes: List[Node] = []
 
+        genesis = Block(None, None, 0)
         if run_config.dumb_attacker:
-            attacker = DumbAttacker(run_config.dumb_attacker, self.__network)
+            attacker = DumbAttacker(
+                genesis, run_config.dumb_attacker, self.__network)
             self.__nodes.append(attacker)
             for i in range(run_config.attacker_head_start):
                 attacker.mine_block()
 
         if run_config.teasing_attacker:
-            attacker2 = TeasingPoWAttacker(
-                run_config.teasing_attacker, self.__network)
+            attacker2 = TeasingPoWAttacker(genesis,
+                                           run_config.teasing_attacker, self.__network)
             self.__nodes.append(attacker2)
             for i in range(run_config.attacker_head_start):
                 attacker2.mine_block()
 
-        self.__nodes += [HonestNode(mining_rate=run_config.honest_block_rate,
+        self.__nodes += [HonestNode(genesis=genesis,
+                                    mining_rate=run_config.honest_block_rate,
                                     bandwidth=run_config.bandwidth,
                                     header_delay=run_config.header_delay,
                                     network=self.__network)
@@ -184,32 +189,31 @@ class Experiment:
 
         if run_config.mode == "pow":
             self.__mining_oracle: Union[PoWMiningOracle,
-                                        PoSMiningOracle] = PoWMiningOracle(self.__nodes)
+                                        PoSMiningOracle] = PoWMiningOracle(self.__env, self.__nodes)
         else:
-            self.__mining_oracle = PoSMiningOracle(
-                self.__nodes, run_config.pos_round_length, run_config.attacker_head_start)
+            self.__mining_oracle = PoSMiningOracle(self.__env,
+                                                   self.__nodes, run_config.pos_round_length, run_config.attacker_head_start)
             raise NotImplementedError("PoS is not fully implemented.")
         self.__run_time = run_config.run_time
 
     def run_experiment(self, progress_bar: bool = True) -> None:
         """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
         if progress_bar:
-            setup_progress_bar(self.__run_time)
-        simulation_parameters.ENV.run(until=self.__run_time)
+            self.setup_progress_bar()
+        self.__env.run(until=self.__run_time)
         if self.__config.plot is not None:
             assert self.__download_log is not None
             plot_timeline(
                 start_time=self.__config.plot[0], end_time=self.__config.plot[1],
                 num_nodes=len(self.__nodes), download_log=self.__download_log)
 
-
-def setup_progress_bar(run_time: float, num_updates: int = 100) -> None:
-    def progress_bar_process() -> Generator[simpy.events.Event, None, None]:
-        with tqdm.tqdm(total=run_time, disable=None, unit="sim_secs") as pbar:
-            for i in range(num_updates):
-                yield simulation_parameters.ENV.timeout(run_time/num_updates)
-                pbar.update(run_time/num_updates)
-    simulation_parameters.ENV.process(progress_bar_process())
+    def setup_progress_bar(self, num_updates: int = 100) -> None:
+        def progress_bar_process() -> Generator[simpy.events.Event, None, None]:
+            with tqdm.tqdm(total=self.__run_time, disable=None, unit="sim_secs") as pbar:
+                for i in range(num_updates):
+                    yield self.__env.timeout(self.__run_time/num_updates)
+                    pbar.update(self.__run_time/num_updates)
+        self.__env.process(progress_bar_process())
 
 
 def calc_honest_chain_height() -> int:

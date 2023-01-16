@@ -4,15 +4,16 @@ from typing import Set, ClassVar, Optional
 from .block import Block
 import sim.network as network
 import simpy.events
-import sim.simulation_parameters as simulation_parameters
+import simpy.core
 import logging
 import pylru  # type: ignore
 
 
 class Node(ABC):
     __next_id: ClassVar[int] = 0
+    env: simpy.core.Environment
 
-    def __init__(self, mining_rate: float, bandwidth: float, header_delay: float,
+    def __init__(self, genesis: Block, mining_rate: float, bandwidth: float, header_delay: float,
                  network: network.Network, partial_block_cache_size: int = 10) -> None:
         # set a unique id:
         self.__id = Node.__next_id
@@ -29,12 +30,12 @@ class Node(ABC):
         self.__network = network
 
         # mining target:
-        self._mining_target = simulation_parameters.GENESIS
+        self._mining_target = genesis
 
         # download management:
         self.__download_process: Optional[simpy.events.Process] = None
         self.__download_target: Optional[Block] = None
-        self._downloaded_blocks: Set[Block] = {simulation_parameters.GENESIS}
+        self._downloaded_blocks: Set[Block] = {genesis}
 
         self._partial_blocks = pylru.lrucache(partial_block_cache_size)
 
@@ -61,8 +62,8 @@ class Node(ABC):
         """This method is called externally by the mining oracle.
         the block is mined on top of the current mining target, and the mining target is adjusted to the new block"""
         block = Block(self, self._mining_target,
-                      simulation_parameters.ENV.now)
-        message = f"Mining t={simulation_parameters.ENV.now:.2f}: Node {self} mines block {block}"
+                      Node.env.now)
+        message = f"Mining t={Node.env.now:.2f}: Node {self} mines block {block}"
         logging.getLogger("SIM_INFO").info(message)
 
         self._downloaded_blocks.add(block)
@@ -70,7 +71,7 @@ class Node(ABC):
         return block
 
     def receive_header(self, block: Block) -> None:
-        message = f"Header t={simulation_parameters.ENV.now:.2f}: Node {self} learns of header {block}"
+        message = f"Header t={Node.env.now:.2f}: Node {self} learns of header {block}"
         logging.getLogger("SIM_INFO").info(message)
 
     def _broadcast_header(self, block: Block) -> None:
@@ -105,7 +106,7 @@ class Node(ABC):
         self.__download_process = None
         self.__download_target = None
 
-        message = f"Download Complete t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}"
+        message = f"Download Complete t={Node.env.now:.2f}: Node {self} downloaded block {block}"
         logging.getLogger("SIM_INFO").info(message)
 
         # add block to download store:
@@ -117,7 +118,7 @@ class Node(ABC):
             self._mining_target = block
 
     def download_interrupted(self, block: Block, cummulative_fraction_downloaded: float) -> None:
-        message = f"Download Interrupt t={simulation_parameters.ENV.now:.2f}: Node {self} downloaded block {block}, fraction: {cummulative_fraction_downloaded}"
+        message = f"Download Interrupt t={Node.env.now:.2f}: Node {self} downloaded block {block}, fraction: {cummulative_fraction_downloaded}"
         logging.getLogger("SIM_INFO").info(message)
 
         self._partial_blocks[block] = cummulative_fraction_downloaded

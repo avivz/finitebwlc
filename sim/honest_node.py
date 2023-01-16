@@ -7,8 +7,8 @@ from .limitted_queue import LimittedQueue
 
 
 class HonestNode(Node):
-    def __init__(self, mining_rate: float, bandwidth: float, header_delay: float, network: network.Network) -> None:
-        super().__init__(mining_rate, bandwidth, header_delay, network)
+    def __init__(self, genesis: Block, mining_rate: float, bandwidth: float, header_delay: float, network: network.Network) -> None:
+        super().__init__(genesis, mining_rate, bandwidth, header_delay, network)
         self.__dl_queue: LimittedQueue[Block, int] = LimittedQueue()
 
     def mine_block(self) -> Block:
