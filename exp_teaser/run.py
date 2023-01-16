@@ -25,7 +25,8 @@ SIMULATION_MODULE = "sim.run_experiment"
 
 PYTHON_PATH = "python"
 
-OUTPUT_PATH = os.path.join(BASE_PATH, "experiment_teasing_attacker/data/")
+OUTPUT_PATH = os.path.join(os.path.split(
+    os.path.abspath(__file__))[0], "data/")
 
 base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
                   f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
