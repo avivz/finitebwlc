@@ -66,7 +66,10 @@ fig.update_layout(legend=dict(
     x=0.02
 ))
 
-if not os.path.exists("images"):
-    os.mkdir("images")
+out_path = os.path.join(BASE_PATH, "images/")
+out_file = os.path.join(out_path, "fig1.png")
+
 print("Saving plot...")
-fig.write_image(os.path.join(BASE_PATH, "images/fig1.png"))
+if not os.path.exists(out_path):
+    os.mkdir(out_path)
+fig.write_image(out_file)

@@ -19,7 +19,7 @@ def setup_parser() -> argparse.ArgumentParser:
 
 
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
-SIMULATION_MODULE = os.path.join(BASE_PATH, "src.run_experiment")
+SIMULATION_MODULE = "sim.run_experiment"
 
 PYTHON_PATH = "python"
 
