@@ -57,7 +57,7 @@ class Node(ABC):
     def __str__(self) -> str:
         return self.__description
 
-    def mine_block(self) -> Block:
+    def mine_block(self, round: Optional[int]) -> Block:
         """This method is called externally by the mining oracle.
         the block is mined on top of the current mining target, and the mining target is adjusted to the new block"""
         block = Block(self, self._mining_target,

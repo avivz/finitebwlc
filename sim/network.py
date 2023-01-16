@@ -6,7 +6,7 @@ import simpy.core
 import simpy.exceptions
 import sim.simulation_parameters as simulation_parameters
 if TYPE_CHECKING:
-    from node import Node
+    from .node import Node
 
 
 class Network:

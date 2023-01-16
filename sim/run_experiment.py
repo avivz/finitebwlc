@@ -151,14 +151,14 @@ class Experiment:
             attacker = DumbAttacker(run_config.dumb_attacker, self.__network)
             self.__nodes.append(attacker)
             for i in range(run_config.attacker_head_start):
-                attacker.mine_block()
+                attacker.mine_block(i+1)
 
         if run_config.teasing_attacker:
             attacker2 = TeasingPoWAttacker(
                 run_config.teasing_attacker, self.__network)
             self.__nodes.append(attacker2)
             for i in range(run_config.attacker_head_start):
-                attacker2.mine_block()
+                attacker2.mine_block(i+1)
 
         self.__nodes += [HonestNode(mining_rate=run_config.honest_block_rate,
                                     bandwidth=run_config.bandwidth,
@@ -171,7 +171,7 @@ class Experiment:
                                         PoSMiningOracle] = PoWMiningOracle(self.__nodes)
         else:
             self.__mining_oracle = PoSMiningOracle(
-                self.__nodes, run_config.pos_round_length)
+                self.__nodes, run_config.pos_round_length, run_config.attacker_head_start)
         self.__run_time = run_config.run_time
 
     def run_experiment(self, progress_bar: bool = True) -> None:

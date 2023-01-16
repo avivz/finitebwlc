@@ -24,7 +24,7 @@ class PoWMiningOracle:
 
             # select miner by relative weight
             miner, = random.choices(self.__nodes, weights=self.__weights, k=1)
-            miner.mine_block()
+            miner.mine_block(None)
 
 
 def get_time_to_next_block(lambda_param: float) -> float:
@@ -34,19 +34,21 @@ def get_time_to_next_block(lambda_param: float) -> float:
 class PoSMiningOracle:
     """in PoS mode, the mining power of each node is interpreted as the (inedpendent) probability that it mines at any given round."""
 
-    def __init__(self, nodes: List[Node], round_length: float):
+    def __init__(self, nodes: List[Node], round_length: float, starting_round: int):
         self.__nodes = nodes[:]
         self.__round_length = round_length
 
         # start the mining events:
-        simulation_parameters.ENV.process(self.run_mining())
+        simulation_parameters.ENV.process(self.run_mining(starting_round))
 
-    def run_mining(self) -> Generator[simpy.events.Timeout, None, None]:
+    def run_mining(self, starting_round: int) -> Generator[simpy.events.Timeout, None, None]:
+        round = starting_round
         while True:
+            round += 1
             yield (simulation_parameters.ENV.timeout(self.__round_length))
 
             numpy.random.shuffle(self.__nodes)  # type: ignore
             coin_toss = numpy.random.random(len(self.__nodes))
             for i, miner in enumerate(self.__nodes):
                 if coin_toss[i] < miner.mining_rate:
-                    miner.mine_block()
+                    miner.mine_block(round)

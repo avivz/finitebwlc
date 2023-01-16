@@ -7,7 +7,7 @@ class Block:
     all_blocks: ClassVar[List["Block"]] = []
     blocks_by_height: ClassVar[List[int]] = []
 
-    def __init__(self, miner: Optional["Node"], parent: Optional["Block"], creation_time: float):
+    def __init__(self, miner: Optional["Node"], parent: Optional["Block"], creation_time: float, round: Optional[int]):
         Block.all_blocks.append(self)
 
         self.__parent = parent
@@ -15,6 +15,7 @@ class Block:
         self.__is_available = True
         self.__creation_time = creation_time
         self.__miner = miner
+        self.__round = round
         if parent:
             parent.__children.append(self)
             self.__height: int = parent.__height+1
@@ -30,6 +31,13 @@ class Block:
         self.__hash = hash(self.__id)
 
         self.__description = f"Block(id={self.id}, h={self.height}, parent_id={self.parent.id if self.parent else None}, creation_time={self.__creation_time})"
+
+    @property
+    def round(self) -> int:
+        if self.__round is None:
+            return self.__height
+        else:
+            return self.__round
 
     @property
     def creation_time(self) -> float:
