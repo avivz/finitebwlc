@@ -1,5 +1,6 @@
 import dataclasses
 from typing import Optional, Tuple, ClassVar
+from sim.honest_node import DownloadRule
 
 
 @dataclasses.dataclass
@@ -33,6 +34,9 @@ class RunConfig:
 
     ATTACKER_HEAD_START: ClassVar[str] = "attacker_head_start"
     attacker_head_start: int = 0
+
+    DOWNLOAD_RULE: ClassVar[str] = "download_rule"
+    download_rule: str = DownloadRule.LongestHeaderChain.value
 
     PLOT: ClassVar[str] = "plot"
     plot: Optional[Tuple[float, float]] = None

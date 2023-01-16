@@ -5,12 +5,24 @@ from .node import Node
 import sim.network as network
 from .limitted_queue import LimittedQueue
 
+from enum import Enum
+
+
+class DownloadRule(Enum):
+    LongestHeaderChain = "longest_header_chain"
+    GreedyExtendChain = "greedy_extend_chain"
+
 
 class HonestNode(Node):
-    def __init__(self, genesis: Block, mining_rate: float, bandwidth: float, header_delay: float, network: network.Network) -> None:
+    def __init__(self, genesis: Block, mining_rate: float, bandwidth: float,
+                 header_delay: float, network: network.Network, download_rule: DownloadRule) -> None:
         super().__init__(genesis, mining_rate, bandwidth, header_delay, network)
-        self.__dl_queue: LimittedQueue[Block,
-                                       int] = LimittedQueue(buffer_size=100)
+        self.__download_rule = download_rule
+        if self.__download_rule == DownloadRule.LongestHeaderChain:
+            self.__dl_queue: LimittedQueue[Block,
+                                           int] = LimittedQueue(buffer_size=100)
+        else:
+            raise NotImplementedError
 
     def mine_block(self) -> Block:
         block = super().mine_block()
@@ -21,7 +33,10 @@ class HonestNode(Node):
 
     def receive_header(self, block: Block) -> None:
         super().receive_header(block)
-        self.__dl_queue.enqueue(block, block.height)
+        if self.__download_rule == DownloadRule.LongestHeaderChain:
+            self.__dl_queue.enqueue(block, block.height)
+        else:
+            raise NotImplementedError
         self._reconsider_next_download()
 
     def _reconsider_next_download(self) -> None:

@@ -9,7 +9,7 @@ import tqdm
 import simpy
 import os
 
-from .honest_node import HonestNode
+from .honest_node import HonestNode, DownloadRule
 from .dumb_attacker import DumbAttacker
 from .node import Node
 from .mining_oracle import PoWMiningOracle, PoSMiningOracle
@@ -133,6 +133,9 @@ def setup_parser() -> argparse.ArgumentParser:
     parser.add_argument("--" + RunConfig.RUN_TIME, default=100, required=True, type=float,
                         help="time to run")
 
+    parser.add_argument("--" + RunConfig.DOWNLOAD_RULE, default=DownloadRule.LongestHeaderChain.value, choices=[rule.value for rule in DownloadRule], required=False, type=str,
+                        help="The download rule to use")
+
     parser.add_argument("--" + RunConfig.NUM_HONEST, default=10, required=True, type=int,
                         help="number of honest nodes")
 
@@ -184,7 +187,8 @@ class Experiment:
                                     mining_rate=run_config.honest_block_rate,
                                     bandwidth=run_config.bandwidth,
                                     header_delay=run_config.header_delay,
-                                    network=self.__network)
+                                    network=self.__network,
+                                    download_rule=DownloadRule(run_config.download_rule))
                          for _ in range(run_config.num_honest)]
 
         if run_config.mode == "pow":
