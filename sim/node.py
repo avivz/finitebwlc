@@ -57,11 +57,11 @@ class Node(ABC):
     def __str__(self) -> str:
         return self.__description
 
-    def mine_block(self, round: Optional[int]) -> Block:
+    def mine_block(self) -> Block:
         """This method is called externally by the mining oracle.
         the block is mined on top of the current mining target, and the mining target is adjusted to the new block"""
         block = Block(self, self._mining_target,
-                      simulation_parameters.ENV.now, round)
+                      simulation_parameters.ENV.now)
         message = f"Mining t={simulation_parameters.ENV.now:.2f}: Node {self} mines block {block}"
         logging.getLogger("SIM_INFO").info(message)
 
@@ -122,15 +122,3 @@ class Node(ABC):
 
         self._partial_blocks[block] = cummulative_fraction_downloaded
         # TODO handle partial downloads here. Currently partial downloads are discarded.
-
-    def push_download(self, block: Block) -> None:
-        message = f"Force-download t={simulation_parameters.ENV.now:.2f}: Node {self} force-downloaded block {block}"
-        logging.getLogger("SIM_INFO").info(message)
-
-        cur = block
-        while cur.parent and cur.parent not in self._downloaded_blocks:
-            cur = cur.parent
-            self._downloaded_blocks.add(cur)
-            if cur in self._partial_blocks:
-                del self._partial_blocks[cur]
-        self.download_complete(block)

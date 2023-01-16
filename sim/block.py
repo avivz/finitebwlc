@@ -1,4 +1,4 @@
-from typing import List, Iterator, Optional, ClassVar, TYPE_CHECKING
+from typing import List, Optional, ClassVar, TYPE_CHECKING
 if TYPE_CHECKING:
     from .node import Node
 
@@ -7,7 +7,7 @@ class Block:
     all_blocks: ClassVar[List["Block"]] = []
     blocks_by_height: ClassVar[List[int]] = []
 
-    def __init__(self, miner: Optional["Node"], parent: Optional["Block"], creation_time: float, round: Optional[int]):
+    def __init__(self, miner: Optional["Node"], parent: Optional["Block"], creation_time: float):
         Block.all_blocks.append(self)
 
         self.__parent = parent
@@ -31,13 +31,6 @@ class Block:
         self.__hash = hash(self.__id)
 
         self.__description = f"Block(id={self.id}, h={self.height}, parent_id={self.parent.id if self.parent else None}, creation_time={self.__creation_time})"
-
-    @property
-    def round(self) -> int:
-        if self.__round is None:
-            return self.__height
-        else:
-            return self.__round
 
     @property
     def creation_time(self) -> float:

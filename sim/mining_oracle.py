@@ -24,7 +24,7 @@ class PoWMiningOracle:
 
             # select miner by relative weight
             miner, = random.choices(self.__nodes, weights=self.__weights, k=1)
-            miner.mine_block(None)
+            miner.mine_block()
 
 
 def get_time_to_next_block(lambda_param: float) -> float:
@@ -51,4 +51,4 @@ class PoSMiningOracle:
             coin_toss = numpy.random.random(len(self.__nodes))
             for i, miner in enumerate(self.__nodes):
                 if coin_toss[i] < miner.mining_rate:
-                    miner.mine_block(round)
+                    miner.mine_block()

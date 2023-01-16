@@ -17,8 +17,8 @@ class TeasingPoWAttacker(Node):
         # this is the tip of the chain this node has allowed others to download.
         self._last_available = simulation_parameters.GENESIS
 
-    def mine_block(self, round: Optional[int]) -> Block:
-        block = super().mine_block(round)
+    def mine_block(self) -> Block:
+        block = super().mine_block()
         block.is_available = False
 
         self._mining_target = block

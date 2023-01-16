@@ -27,10 +27,6 @@ class Network:
                     node.receive_header(block)
                 simulation_parameters.ENV.process(task(node, block))
 
-    # def _send_block_to_node(self, block: Block, node: "Node") -> Generator[simpy.events.Event, None, None]:
-    #     yield self.__env.timeout(self.__header_delay)
-    #     node.receive_header(block)
-
     def schedule_download_single_block(self, downloader: "Node", block: Block, bandwidth: float,
                                        fraction_already_dled: float) -> simpy.events.Process:
         if not block.is_available:
@@ -56,10 +52,6 @@ class Network:
                         (block, float(start_time), float(end_time)))
 
         return simulation_parameters.ENV.process(download_task())
-
-    def push_block(self, nodes: List["Node"], block: Block) -> None:
-        for node in nodes:
-            node.push_download(block)
 
     @property
     def download_log(self) -> Optional[Dict["Node", List[Tuple[Block, float, float]]]]:

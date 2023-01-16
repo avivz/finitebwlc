@@ -167,14 +167,14 @@ class Experiment:
             attacker = DumbAttacker(run_config.dumb_attacker, self.__network)
             self.__nodes.append(attacker)
             for i in range(run_config.attacker_head_start):
-                attacker.mine_block(i+1)
+                attacker.mine_block()
 
         if run_config.teasing_attacker:
             attacker2 = TeasingPoWAttacker(
                 run_config.teasing_attacker, self.__network)
             self.__nodes.append(attacker2)
             for i in range(run_config.attacker_head_start):
-                attacker2.mine_block(i+1)
+                attacker2.mine_block()
 
         self.__nodes += [HonestNode(mining_rate=run_config.honest_block_rate,
                                     bandwidth=run_config.bandwidth,
@@ -188,6 +188,7 @@ class Experiment:
         else:
             self.__mining_oracle = PoSMiningOracle(
                 self.__nodes, run_config.pos_round_length, run_config.attacker_head_start)
+            raise NotImplementedError("PoS is not fully implemented.")
         self.__run_time = run_config.run_time
 
     def run_experiment(self, progress_bar: bool = True) -> None:

@@ -11,8 +11,8 @@ class HonestNode(Node):
         super().__init__(mining_rate, bandwidth, header_delay, network)
         self.__dl_queue: LimittedQueue[Block, int] = LimittedQueue()
 
-    def mine_block(self, round: Optional[int]) -> Block:
-        block = super().mine_block(round)
+    def mine_block(self) -> Block:
+        block = super().mine_block()
 
         self._broadcast_header(block)
         self._reconsider_next_download()

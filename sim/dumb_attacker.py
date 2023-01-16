@@ -11,8 +11,8 @@ class DumbAttacker(Node):
         super().__init__(mining_rate, bandwidth=0, header_delay=0, network=network)
         self._tip = simulation_parameters.GENESIS
 
-    def mine_block(self, round: Optional[int]) -> Block:
-        block = super().mine_block(round)
+    def mine_block(self) -> Block:
+        block = super().mine_block()
 
         self._broadcast_header(block)
         self._mining_target = block
