@@ -9,5 +9,5 @@ env_rory/
 __pycache__/
 
 #experimental data
-experiment_honest_growth/data/*.json
-experiment_teasing_attacker/data/*.json
+exp_growth/data/*.json
+exp_teaser/data/*.json

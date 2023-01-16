@@ -2,6 +2,7 @@
 import numpy
 import os
 import argparse
+from sim.configuration import RunConfig
 
 
 def setup_parser() -> argparse.ArgumentParser:
@@ -18,14 +19,18 @@ def setup_parser() -> argparse.ArgumentParser:
 
 
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
-SIMULATION_PATH = os.path.join(BASE_PATH, "src/run_experiment.py")
+SIMULATION_MODULE = os.path.join(BASE_PATH, "src.run_experiment")
 
 PYTHON_PATH = "python"
 
-OUTPUT_PATH = os.path.join(BASE_PATH, "experiment_honest_growth/data/")
+OUTPUT_PATH = os.path.join(os.path.split(
+    os.path.abspath(__file__))[0], "data/")
 
-base_arguments = ["--run_time 10000", "--num_honest 100", "--mode pow",
-                  "--pow_honest 0.01"]  # "--header_delay 0"  "--bandwidth -1"
+if not os.path.exists(OUTPUT_PATH):
+    os.mkdir(OUTPUT_PATH)
+
+base_arguments = [f"--{RunConfig.RUN_TIME} 10000", f"--{RunConfig.NUM_HONEST} 100", f"--{RunConfig.MODE} pow",
+                  f"--{RunConfig.HONEST_BLOCK_RATE} 0.01"]
 
 bandwidth_range = numpy.arange(0.05, 2, 0.05)
 num_repetitions = 100
@@ -41,17 +46,17 @@ for index, bandwidth in enumerate(bandwidth_range):
         file_name1 = os.path.join(
             OUTPUT_PATH, "exp1_band_" + str(index)+"_"+str(rep)+".json")
         arguments1 = base_arguments + \
-            [f"--header_delay 0 --bandwidth {bandwidth}",
-                f"--saveResults {file_name1}"]
+            [f"--{RunConfig.HEADER_DELAY} 0 --{RunConfig.BANDWIDTH} {bandwidth}",
+                f"--{RunConfig.SAVE_RESULTS} {file_name1}"]
 
         file_name2 = os.path.join(
             OUTPUT_PATH, "exp1_delay_" + str(index)+"_"+str(rep)+".json")
         arguments2 = base_arguments + \
-            [f"--header_delay {1/bandwidth} --bandwidth -1",
-                f"--saveResults {file_name2}"]
+            [f"--{RunConfig.HEADER_DELAY} {1/bandwidth} --{RunConfig.BANDWIDTH} -1",
+                f"--{RunConfig.SAVE_RESULTS} {file_name2}"]
 
-        cmd1 = f"{PYTHON_PATH} {SIMULATION_PATH} {' '.join(arguments1)}"
-        cmd2 = f"{PYTHON_PATH} {SIMULATION_PATH} {' '.join(arguments2)}"
+        cmd1 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments1)}"
+        cmd2 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments2)}"
 
         if args.slurm:
             cmd1 = f'sbatch --mem=8g -c1 --wrap="{cmd1}"'
