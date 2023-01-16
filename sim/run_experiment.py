@@ -7,6 +7,7 @@ import sys
 import json
 import tqdm
 import simpy
+import os
 
 from .honest_node import HonestNode
 from .dumb_attacker import DumbAttacker
@@ -22,6 +23,8 @@ from .configuration import RunConfig
 import plotly.graph_objects as go  # type: ignore
 import plotly.express as px  # type: ignore
 
+BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
+
 
 def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_log: Dict[Node, List[Tuple[Block, float, float]]]) -> None:
     fig = go.Figure()
@@ -32,11 +35,13 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
     colors = px.colors.qualitative.Alphabet
 
     # plot download rectangles
+    print("adding dl rectangles")
     for node in download_log:
+        print("adding_shapes for node", node)
         dl_list = download_log[node]
         for block, start, end in dl_list:
             if start > end_time:
-                break
+                continue
             if end < start_time:
                 continue
             fig.add_shape(type="rect", xref="x", yref="y", x0=start, x1=end,
@@ -45,8 +50,8 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
             fig.add_annotation(
                 x=(start+end)/2, y=node.id - height/2, xref='x', yref='y', text=str(block.id), opacity=0.5,
                 showarrow=False)
-
     # plotting of blocks using markers
+    print("drawing block markers")
     x_vals = [block.creation_time for block in Block.all_blocks if start_time <=
               block.creation_time <= end_time]
     y_vals = [block.miner.id if block.miner else 0 for block in Block.all_blocks if start_time <=
@@ -56,6 +61,8 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
     fig.add_trace(go.Scatter(mode="markers+text", x=x_vals, y=y_vals, text=text, textposition="top center", marker_symbol="square",
                              marker_line_color="midnightblue", marker_color="lightskyblue",
                              marker_line_width=2, marker_size=10))
+
+    print("drawing block arrows")
     for block in Block.all_blocks:
         miner_id = block.miner.id if block.miner else 0
 
@@ -68,6 +75,7 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
                     xref='x', yref='y', axref='x', ayref='y', text='',
                     showarrow=True, arrowhead=3, arrowsize=1, arrowwidth=1, arrowcolor='black')
 
+    print("finalizing figure layout")
     # Set axes ranges
     fig.update_xaxes(
         range=[start_time - width, end_time + width], showgrid=False, zeroline=False)
@@ -75,6 +83,14 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
                      1 + height], dtick=1, tick0=1, showgrid=False, zeroline=False,
                      tickvals=list(range(num_nodes)), ticktext=[f"Node {i}" for i in range(num_nodes)], tickmode="array")
     fig.update_layout(xaxis_title="time (sec)")
+
+    out_path = os.path.join(BASE_PATH, "images/")
+    out_file = os.path.join(out_path, "block_trace.svg")
+
+    print("Saving plot...")
+    if not os.path.exists(out_path):
+        os.mkdir(out_path)
+    fig.write_image(out_file)
     fig.show()
 
 

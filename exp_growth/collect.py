@@ -79,7 +79,7 @@ fig.update_layout(legend=dict(
 ))
 
 out_path = os.path.join(BASE_PATH, "images/")
-out_file = os.path.join(out_path, "fig1.png")
+out_file = os.path.join(out_path, "fig1.svg")
 
 print("Saving plot...")
 if not os.path.exists(out_path):
