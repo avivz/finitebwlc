@@ -1,5 +1,5 @@
 
-from typing import List, Generator, TYPE_CHECKING, Dict, Tuple, Optional
+from typing import List, Generator, TYPE_CHECKING, Dict, Tuple, Optional, Set
 from .block import Block
 import simpy.events
 import simpy.core
@@ -13,14 +13,34 @@ class Network:
         self.__nodes: List[Node] = []
         self.__download_log = download_log
         self.__env = env
+        self.__split: List[Node] = []
+        self.__split2: List[Node] = []
 
     def connect(self, node: "Node") -> None:
         self.__nodes.append(node)
         if self.__download_log is not None:
             self.__download_log[node] = []
 
+    def induce_split(self, split: Set["Node"]) -> None:
+        self.__split = list(split)
+        print("SPLIT1", self.__split)
+        self.__split2 = list(
+            node for node in self.__nodes if node not in split)
+        print("SPLIT2", self.__split2)
+
+    def end_split(self) -> None:
+        self.__split = []
+        self.__split2 = []
+
     def schedule_notify_all_of_header(self, sender: "Node", block: Block) -> None:
-        for node in self.__nodes:
+        nodes_to_notify = self.__nodes
+        if self.__split:
+            if sender in self.__split:
+                nodes_to_notify = self.__split
+            else:
+                nodes_to_notify = self.__split2
+
+        for node in nodes_to_notify:
             if node is not sender:
                 def task(node: "Node", block: Block) -> Generator[simpy.events.Event, None, None]:
                     yield self.__env.timeout(node.header_delay)

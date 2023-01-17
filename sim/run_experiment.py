@@ -9,14 +9,15 @@ import tqdm
 import simpy
 import os
 
-from .honest_node import HonestNode, DownloadRule
+from .honest_node_longest_header_chain import HonestNodeLongestHeaderChain
+from .honest_node_greedy_chain import HonestNodeGreedy
 from .dumb_attacker import DumbAttacker
 from .node import Node
 from .mining_oracle import PoWMiningOracle, PoSMiningOracle
 from .network import Network
 from .block import Block
 from .teasing_pow_attacker import TeasingPoWAttacker
-from .configuration import RunConfig
+from .configuration import RunConfig, DownloadRules
 
 
 import plotly.graph_objects as go  # type: ignore
@@ -108,8 +109,11 @@ def setup_parser() -> argparse.ArgumentParser:
     parser.add_argument("--" + RunConfig.VERBOSE,
                         action='store_true', help="print events to stdout")
 
-    parser.add_argument('--' + RunConfig.PLOT, nargs=2, type=int, metavar=('START', 'END'),
+    parser.add_argument('--' + RunConfig.PLOT, nargs=2, type=float, metavar=('START', 'END'),
                         help="plot a block diagram from <START> to <END> times")
+
+    parser.add_argument('--' + RunConfig.INDUCE_SPLIT, nargs=2, type=float, metavar=('START', 'END'),
+                        help="split the network from <START> to <END> times")
 
     parser.add_argument("--" + RunConfig.MODE, choices=[
                         'pos', 'pow'], help="which mode of operation we are using", required=True)
@@ -133,7 +137,7 @@ def setup_parser() -> argparse.ArgumentParser:
     parser.add_argument("--" + RunConfig.RUN_TIME, default=100, required=True, type=float,
                         help="time to run")
 
-    parser.add_argument("--" + RunConfig.DOWNLOAD_RULE, default=DownloadRule.LongestHeaderChain.value, choices=[rule.value for rule in DownloadRule], required=False, type=str,
+    parser.add_argument("--" + RunConfig.DOWNLOAD_RULE, default=DownloadRules.LongestHeaderChain.value, choices=[rule.value for rule in DownloadRules], required=False, type=str,
                         help="The download rule to use")
 
     parser.add_argument("--" + RunConfig.NUM_HONEST, default=10, required=True, type=int,
@@ -183,13 +187,19 @@ class Experiment:
             for i in range(run_config.attacker_head_start):
                 attacker2.mine_block()
 
-        self.__nodes += [HonestNode(genesis=genesis,
-                                    mining_rate=run_config.honest_block_rate,
-                                    bandwidth=run_config.bandwidth,
-                                    header_delay=run_config.header_delay,
-                                    network=self.__network,
-                                    download_rule=DownloadRule(run_config.download_rule))
-                         for _ in range(run_config.num_honest)]
+        if run_config.download_rule == DownloadRules.LongestHeaderChain.value:
+            def node_factory() -> Node:
+                return HonestNodeLongestHeaderChain(genesis, run_config.honest_block_rate, run_config.bandwidth,
+                                                    run_config.header_delay, self.__network)
+        elif run_config.download_rule == DownloadRules.GreedyExtendChain.value:
+            def node_factory() -> Node:
+                return HonestNodeGreedy(genesis, run_config.honest_block_rate, run_config.bandwidth,
+                                        run_config.header_delay, self.__network)
+        else:
+            raise ValueError("Unsupported download rule:" +
+                             str(run_config.download_rule))
+
+        self.__nodes += [node_factory() for _ in range(run_config.num_honest)]
 
         if run_config.mode == "pow":
             self.__mining_oracle: Union[PoWMiningOracle,
@@ -204,6 +214,17 @@ class Experiment:
         """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
         if progress_bar:
             self.setup_progress_bar()
+
+        if self.__config.induce_split is not None:
+            split_start, split_end = self.__config.induce_split
+            if split_start < self.__run_time and split_end > split_start:
+                self.__env.run(until=split_start)
+                mid = len(self.__nodes)//2
+                self.__network.induce_split(set(self.__nodes[:mid]))
+            if split_end < self.__run_time:
+                self.__env.run(until=split_end)
+                self.__network.end_split()
+
         self.__env.run(until=self.__run_time)
         if self.__config.plot is not None:
             assert self.__download_log is not None
@@ -222,7 +243,7 @@ class Experiment:
 
 def calc_honest_chain_height() -> int:
     for block in reversed(Block.all_blocks):
-        if type(block.miner) == HonestNode:
+        if type(block.miner) == HonestNodeLongestHeaderChain:
             return block.height
     return 0
 

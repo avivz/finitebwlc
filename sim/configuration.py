@@ -1,6 +1,11 @@
 import dataclasses
 from typing import Optional, Tuple, ClassVar
-from sim.honest_node import DownloadRule
+from enum import Enum
+
+
+class DownloadRules(Enum):
+    LongestHeaderChain = "longest_header_chain"
+    GreedyExtendChain = "greedy_extend_chain"
 
 
 @dataclasses.dataclass
@@ -26,6 +31,9 @@ class RunConfig:
     HEADER_DELAY: ClassVar[str] = "header_delay"
     header_delay: float = 0
 
+    INDUCE_SPLIT: ClassVar[str] = "induce_split"
+    induce_split: Optional[Tuple[float, float]] = None
+
     DUMB_ATTACKER: ClassVar[str] = "dumb_attacker"
     dumb_attacker: float = 0
 
@@ -36,7 +44,7 @@ class RunConfig:
     attacker_head_start: int = 0
 
     DOWNLOAD_RULE: ClassVar[str] = "download_rule"
-    download_rule: str = DownloadRule.LongestHeaderChain.value
+    download_rule: str = DownloadRules.LongestHeaderChain.value
 
     PLOT: ClassVar[str] = "plot"
     plot: Optional[Tuple[float, float]] = None
