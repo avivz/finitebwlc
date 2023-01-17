@@ -41,8 +41,8 @@ args = parser.parse_args()
 num_skipped = 0
 num_ran = 0
 
-for index, bandwidth in enumerate(bandwidth_range):
-    for rep in range(num_repetitions):
+for rep in range(num_repetitions):
+    for index, bandwidth in enumerate(bandwidth_range):
         file_name1 = os.path.join(
             OUTPUT_PATH, "exp1_band_" + str(index)+"_"+str(rep)+".json")
         arguments1 = base_arguments + \

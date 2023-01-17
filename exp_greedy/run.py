@@ -57,8 +57,8 @@ num_repetitions = 200
 num_skipped = 0
 commands_to_run: List[str] = []
 
-for index, bandwidth in enumerate(bandwidth_range):
-    for rep in range(num_repetitions):
+for rep in range(num_repetitions):
+    for index, bandwidth in enumerate(bandwidth_range):
         file_name1 = os.path.join(
             DATA_PATH, "exp3_greedy_" + str(index)+"_"+str(rep)+".json")
         arguments1 = base_arguments + [f"--{sim.configuration.RunConfig.BANDWIDTH} {bandwidth}",
