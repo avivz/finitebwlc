@@ -23,10 +23,8 @@ class Network:
 
     def induce_split(self, split: Set["Node"]) -> None:
         self.__split = list(split)
-        print("SPLIT1", self.__split)
         self.__split2 = list(
             node for node in self.__nodes if node not in split)
-        print("SPLIT2", self.__split2)
 
     def end_split(self) -> None:
         self.__split = []
