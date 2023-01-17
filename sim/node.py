@@ -40,6 +40,10 @@ class Node(ABC):
         self._partial_blocks = pylru.lrucache(partial_block_cache_size)
 
     @property
+    def mining_target(self) -> Block:
+        return self._mining_target
+
+    @property
     def mining_rate(self) -> float:
         return self.__mining_rate
 
