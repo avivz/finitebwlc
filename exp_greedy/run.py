@@ -44,14 +44,14 @@ base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 2000",
                   f"--{sim.configuration.RunConfig.MODE} pow",
                   f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01",
                   f"--{sim.configuration.RunConfig.HEADER_DELAY} 0",
-                  f"--{sim.configuration.RunConfig.INDUCE_SPLIT} 0.001 10"
+                  f"--{sim.configuration.RunConfig.INDUCE_SPLIT} 0.001 15"
                   ]
 
 
-bandwidth_range = numpy.arange(-2, 5.001, 0.2)
+bandwidth_range = numpy.arange(-2, 5.001, 0.1)
 bandwidth_range = numpy.power(10, bandwidth_range)
 
-num_repetitions = 5
+num_repetitions = 100
 
 
 num_skipped = 0
