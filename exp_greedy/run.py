@@ -39,19 +39,19 @@ DATA_PATH = os.path.join(DATA_ROOT_PATH, args.data_dir[0])
 if not os.path.exists(DATA_PATH):
     os.mkdir(DATA_PATH)
 
-base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 2000",
+base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 4000",
                   f"--{sim.configuration.RunConfig.NUM_HONEST} 100",
                   f"--{sim.configuration.RunConfig.MODE} pow",
                   f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01",
                   f"--{sim.configuration.RunConfig.HEADER_DELAY} 0",
-                  f"--{sim.configuration.RunConfig.INDUCE_SPLIT} 0.001 15"
+                  f"--{sim.configuration.RunConfig.INDUCE_SPLIT} 0.001 20"
                   ]
 
 
 bandwidth_range = numpy.arange(-2, 5.001, 0.1)
 bandwidth_range = numpy.power(10, bandwidth_range)
 
-num_repetitions = 100
+num_repetitions = 200
 
 
 num_skipped = 0
