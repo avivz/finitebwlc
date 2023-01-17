@@ -10,4 +10,4 @@ __pycache__/
 
 #experimental data
 exp_growth/data/*.json
-exp_teaser/data/*.json
+exp_teaser/data/*/*.json

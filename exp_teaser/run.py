@@ -13,6 +13,9 @@ def setup_parser() -> argparse.ArgumentParser:
         description='Runs the experiment',
         fromfile_prefix_chars='@')
 
+    parser.add_argument('--data_dir',
+                        nargs=1, help="where to save results within the data directory", required=True, type=str)
+
     parser.add_argument('--slurm',
                         action='store_true', help="runs the code in parallel on slurm using sbatch")  # on/off flag
     parser.add_argument('--no_out',
@@ -25,35 +28,40 @@ SIMULATION_MODULE = "sim.run_experiment"
 
 PYTHON_PATH = "python"
 
-OUTPUT_PATH = os.path.join(os.path.split(
+DATA_ROOT_PATH = os.path.join(os.path.split(
     os.path.abspath(__file__))[0], "data/")
-
-base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
-                  f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
-
-bandwidth_range = numpy.arange(0.05, 2.01, 0.05)
-num_repetitions = 100
+if not os.path.exists(DATA_ROOT_PATH):
+    os.mkdir(DATA_ROOT_PATH)
 
 parser = setup_parser()
 args = parser.parse_args()
 
+DATA_PATH = os.path.join(DATA_ROOT_PATH, args.data_dir[0])
+if not os.path.exists(DATA_PATH):
+    os.mkdir(DATA_PATH)
+
+base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 1000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
+                  f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
+
+bandwidth_range = numpy.arange(-2, 5.001, 0.1)
+bandwidth_range = numpy.power(10, bandwidth_range)
+
+num_repetitions = 10
+
+
 num_skipped = 0
-
-if not os.path.exists(OUTPUT_PATH):
-    os.mkdir(OUTPUT_PATH)
-
 commands_to_run: List[str] = []
 
 for index, bandwidth in enumerate(bandwidth_range):
     for rep in range(num_repetitions):
         file_name1 = os.path.join(
-            OUTPUT_PATH, "exp2_band_" + str(index)+"_"+str(rep)+".json")
+            DATA_PATH, "exp2_band_" + str(index)+"_"+str(rep)+".json")
         arguments1 = base_arguments + \
             [f"--{sim.configuration.RunConfig.BANDWIDTH} {bandwidth}",
                 f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name1}"]
 
         file_name2 = os.path.join(
-            OUTPUT_PATH, "exp2_teaser_" + str(index)+"_"+str(rep)+".json")
+            DATA_PATH, "exp2_teaser_" + str(index)+"_"+str(rep)+".json")
         arguments2 = arguments1 + \
             [f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name2}",
                 f"--{sim.configuration.RunConfig.TEASING_ATTACKER} 1.0", f"--{sim.configuration.RunConfig.ATTACKER_HEAD_START} 100"]

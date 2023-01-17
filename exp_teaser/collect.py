@@ -7,10 +7,36 @@ import plotly.graph_objects as go  # type:ignore
 import numpy as np
 import tqdm
 import csv
+import argparse
 
 BASE_PATH = os.path.split(os.path.abspath(__file__))[0]
 PYTHON_PATH = "python"
-DATA_PATH = os.path.join(BASE_PATH, "data/")
+BASE_DATA_PATH = os.path.join(BASE_PATH, "data/")
+
+
+def setup_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog='collect',
+        description='Analyzes results of the experiment',
+        fromfile_prefix_chars='@')
+
+    parser.add_argument('--logx',
+                        action='store_true', help="makes x axis logscale")  # on/off flag
+
+    parser.add_argument('--data_dir',
+                        nargs=1, help="where to find results within the data directory", required=True, type=str)
+
+    return parser
+
+
+parser = setup_parser()
+args = parser.parse_args()
+
+
+DATA_PATH = os.path.join(BASE_DATA_PATH, args.data_dir[0])
+BASE_OUT_PATH = os.path.join(BASE_PATH, "results/")
+if not os.path.exists(BASE_OUT_PATH):
+    os.mkdir(BASE_OUT_PATH)
 
 data: Dict[Tuple[float, bool], List[float]] = dict()
 
@@ -58,7 +84,7 @@ fig = px.scatter(records, x="bandwidth", y="chain growth",
                  labels={
                      "x": "Bandwidth",
                      "y": "Rate of chain growth",
-                 },)
+                 }, log_x=args.logx)
 
 fig.update_layout(legend=dict(
     yanchor="top",
@@ -67,13 +93,17 @@ fig.update_layout(legend=dict(
     x=0.02
 ))
 
-out_path = os.path.join(BASE_PATH, "results/")
+out_path = os.path.join(BASE_OUT_PATH, args.data_dir[0])
 out_file = os.path.join(out_path, "fig_exp_teaser.svg")
+out_file2 = os.path.join(out_path, "fig_exp_teaser.png")
 
-print(f"Saving plot to {out_file}")
+
+print(f"Saving plot to {out_file}, {out_file2}")
 if not os.path.exists(out_path):
     os.mkdir(out_path)
 fig.write_image(out_file)
+fig.write_image(out_file2)
+
 
 csv_file = os.path.join(out_path, "exp_teaser.csv")
 
