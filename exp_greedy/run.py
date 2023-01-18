@@ -95,7 +95,6 @@ if args.slurm:
 
 for command in tqdm.tqdm(commands_to_run):
     print(f"RUNNING: {command}")
-
     os.system(command)
 
 print(f"\n\nskipped: {num_skipped}, ran: {len(commands_to_run)}.")

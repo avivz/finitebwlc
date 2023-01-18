@@ -8,11 +8,35 @@ import numpy as np
 import math
 import tqdm
 import csv
+import argparse
 
 BASE_PATH = os.path.split(os.path.abspath(__file__))[0]
-print(BASE_PATH)
 PYTHON_PATH = "python"
-DATA_PATH = os.path.join(BASE_PATH, "data/")
+BASE_DATA_PATH = os.path.join(BASE_PATH, "data/")
+
+
+def setup_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog='collect',
+        description='Analyzes results of the experiment',
+        fromfile_prefix_chars='@')
+
+    parser.add_argument('--logx',
+                        action='store_true', help="makes x axis logscale")  # on/off flag
+
+    parser.add_argument('--data_dir',
+                        nargs=1, help="where to find results within the data directory", required=True, type=str)
+
+    return parser
+
+
+parser = setup_parser()
+args = parser.parse_args()
+
+DATA_PATH = os.path.join(BASE_DATA_PATH, args.data_dir[0])
+BASE_OUT_PATH = os.path.join(BASE_PATH, "results/")
+if not os.path.exists(BASE_OUT_PATH):
+    os.mkdir(BASE_OUT_PATH)
 
 bandwidth_data: Dict[float, List[float]] = dict()
 delay_data: Dict[float, List[float]] = dict()
@@ -78,33 +102,15 @@ fig.update_layout(legend=dict(
     x=0.02
 ))
 
-out_path = os.path.join(BASE_PATH, "results/")
+out_path = os.path.join(BASE_OUT_PATH, args.data_dir[0])
 out_file = os.path.join(out_path, "fig_exp_growth.svg")
-
-print(f"Saving plot to {out_file}")
-if not os.path.exists(out_path):
-    os.mkdir(out_path)
-fig.write_image(out_file)
-
 out_file2 = os.path.join(out_path, "fig_exp_growth.png")
-fig.write_image(out_file2)
 
-
+print(f"Saving plot to {out_file}, {out_file2}")
 if not os.path.exists(out_path):
     os.mkdir(out_path)
 fig.write_image(out_file)
-
-
-# csv_file_joint = os.path.join(out_path, "exp_growth.csv")
-# print(f"Saving csv to {csv_file_joint}")
-
-# x_data = bw_values+adjusted_delay_values
-# y_data = bw_growth_values+delay_growth_values
-# with open(csv_file_joint, 'w') as csvfile:
-#     csv_writer = csv.writer(csvfile)
-#     csv_writer.writerow(["x_bandwidth", "y_chain_growth", "model"])
-#     for i in range(len(x_data)):
-#         csv_writer.writerow([x_data[i], y_data[i], draw_type[i]])
+fig.write_image(out_file2)
 
 
 # write csv files separately for each plot:
@@ -120,7 +126,7 @@ def write_to_csv(filename: str, fields: List[str], x_values: List[Any], y_values
                 [x_values[i], y_values[i]])
 
 
-write_to_csv(filename=os.path.join(out_path, "exp_growth_delay.txt"),
+write_to_csv(filename=os.path.join(out_path, "fig-experiment-growth-delay-data.txt"),
              fields=["inverse_delay", "chain_growth"],
              x_values=adjusted_delay_values,
              y_values=delay_growth_values,
@@ -128,7 +134,7 @@ write_to_csv(filename=os.path.join(out_path, "exp_growth_delay.txt"),
              )
 
 
-write_to_csv(filename=os.path.join(out_path, "exp_growth_bandwidth.txt"),
+write_to_csv(filename=os.path.join(out_path, "fig-experiment-growth-bandwidth-data.txt"),
              fields=["bandwidth", "chain_growth"],
              x_values=bw_values,
              y_values=bw_growth_values,

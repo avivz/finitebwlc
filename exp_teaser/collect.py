@@ -105,6 +105,25 @@ fig.write_image(out_file)
 fig.write_image(out_file2)
 
 
+def write_to_csv(filename: str, fields: List[str], x_values: List[Any], y_values: List[Any], delimiter: str = ",") -> None:
+    print(f"Saving csv to {filename}")
+
+    with open(filename, 'w') as csvfile:
+        csv_writer = csv.writer(csvfile, delimiter=delimiter)
+        csv_writer.writerow(fields)
+        for i in range(len(x_values)):
+            csv_writer.writerow(
+                [x_values[i], y_values[i]])
+
+# TODO adapt this! usage example:
+# write_to_csv(filename=os.path.join(out_path, "fig-experiment-growth-delay-data.txt"),
+#              fields=["inverse_delay", "chain_growth"],
+#              x_values=adjusted_delay_values,
+#              y_values=delay_growth_values,
+#              delimiter="\t"
+#              )
+
+
 csv_file = os.path.join(out_path, "exp_teaser.csv")
 
 print(f"Saving csv to {csv_file}")
