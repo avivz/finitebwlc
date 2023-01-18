@@ -87,13 +87,12 @@ print("Creating plot...")
 draw_type = ["Bandwidth Limits"]*len(bw_values) + \
     ["Constant Delay"]*len(adjusted_delay_values)
 fig = px.scatter(x=bw_values+adjusted_delay_values, y=bw_growth_values+delay_growth_values,
-                 # error_y=bw_error_values+delay_error_values,
                  color=draw_type,
                  labels={
                      "x": "Bandwidth or 1/Delay",
                      "y": "Rate of chain growth",
                      "color": "Block Propagation Model",
-                 },)
+                 }, log_x=args.logx)
 
 fig.update_layout(legend=dict(
     yanchor="top",
