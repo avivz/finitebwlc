@@ -162,10 +162,10 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
             if end < start_time:
                 continue
             fig.add_shape(type="rect", xref="x", yref="y", x0=start, x1=end,
-                          y0=node.id-height, y1=node.id,
+                          y0=node.id-height/2, y1=node.id + height/2,
                           fillcolor=colors[hash(block) % len(colors)], line=dict(color="black", width=1), opacity=0.2, layer="below")
             fig.add_annotation(
-                x=(start+end)/2, y=node.id - height/2, xref='x', yref='y', text=str(block.id), opacity=0.5,
+                x=(start+end)/2, y=node.id - height, xref='x', yref='y', text=str(block.id), opacity=0.3,
                 showarrow=False)
     # plotting of blocks using markers
     print("drawing block markers")
@@ -196,16 +196,18 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
     # Set axes ranges
     fig.update_xaxes(
         range=[start_time - width, end_time + width], showgrid=False, zeroline=False)
-    fig.update_yaxes(range=[0 - height, num_nodes -
-                     1 + height], dtick=1, tick0=1, showgrid=False, zeroline=False,
+    fig.update_yaxes(range=[0 - 3*height, num_nodes -
+                     1 + 3*height], dtick=1, tick0=1, showgrid=False, zeroline=False,
                      tickvals=list(range(num_nodes)), ticktext=[f"Node {i}" for i in range(num_nodes)], tickmode="array")
-    fig.update_layout(xaxis_title="time (sec)")
+    fig.update_layout(xaxis_title="time (sec)", width=800,
+                      height=400)
 
     out_path = os.path.join(BASE_PATH, "images/")
     out_file = os.path.join(out_path, "block_trace.svg")
+    out_file2 = os.path.join(out_path, "block_trace.png")
 
     print("Saving plot...")
     if not os.path.exists(out_path):
         os.mkdir(out_path)
     fig.write_image(out_file)
-    fig.show()
+    fig.write_image(out_file2)
