@@ -126,7 +126,7 @@ write_to_csv(filename=os.path.join(out_path, "fig-experiment-greedy-greedydl-dat
              fields=["bandwidth", "max_ancestor_height"],
              x_values=[record["bandwidth"]
                        for record in records if record["download_rule"] == "greedy_extend_chain"],
-             y_values=[record["chain growth"]
+             y_values=[record["max ancestor height"]
                        for record in records if record["download_rule"] == "greedy_extend_chain"],
              delimiter=" "
              )
