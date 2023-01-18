@@ -75,14 +75,12 @@ for rep in range(num_repetitions):
             print(f"SKIPPING {file_name1}")
             num_skipped += 1
         else:
-            print(f"{index}: RUNNING: {cmd1}")
             commands_to_run.append(cmd1)
 
         if os.path.exists(file_name2) and os.path.getsize(file_name2) > 0:
             print(f"SKIPPING {file_name2}")
             num_skipped += 1
         else:
-            print(f"{index}: RUNNING: {cmd2}")
             commands_to_run.append(cmd2)
 
 if args.slurm:
