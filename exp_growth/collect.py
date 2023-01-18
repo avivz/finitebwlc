@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 import json
 import os
-from pprint import pprint
-from typing import Dict, List
+from typing import Dict, List, Any
 import plotly.express as px  # type: ignore
 import plotly.graph_objects as go  # type:ignore
 import numpy as np
@@ -87,19 +86,51 @@ if not os.path.exists(out_path):
     os.mkdir(out_path)
 fig.write_image(out_file)
 
+out_file2 = os.path.join(out_path, "fig_exp_growth.png")
+fig.write_image(out_file2)
+
 
 if not os.path.exists(out_path):
     os.mkdir(out_path)
 fig.write_image(out_file)
 
 
-csv_file = os.path.join(out_path, "exp_growth.csv")
-print(f"Saving csv to {csv_file}")
+# csv_file_joint = os.path.join(out_path, "exp_growth.csv")
+# print(f"Saving csv to {csv_file_joint}")
 
-x_data = bw_values+adjusted_delay_values
-y_data = bw_growth_values+delay_growth_values
-with open(csv_file, 'w') as csvfile:
-    csv_writer = csv.writer(csvfile)
-    csv_writer.writerow(["x_bandwidth", "y_chain_growth", "model"])
-    for i in range(len(x_data)):
-        csv_writer.writerow([x_data[i], y_data[i], draw_type[i]])
+# x_data = bw_values+adjusted_delay_values
+# y_data = bw_growth_values+delay_growth_values
+# with open(csv_file_joint, 'w') as csvfile:
+#     csv_writer = csv.writer(csvfile)
+#     csv_writer.writerow(["x_bandwidth", "y_chain_growth", "model"])
+#     for i in range(len(x_data)):
+#         csv_writer.writerow([x_data[i], y_data[i], draw_type[i]])
+
+
+# write csv files separately for each plot:
+
+def write_to_csv(filename: str, fields: List[str], x_values: List[Any], y_values: List[Any], delimiter: str = ",") -> None:
+    print(f"Saving csv to {filename}")
+
+    with open(filename, 'w') as csvfile:
+        csv_writer = csv.writer(csvfile, delimiter=delimiter)
+        csv_writer.writerow(fields)
+        for i in range(len(x_values)):
+            csv_writer.writerow(
+                [x_values[i], y_values[i]])
+
+
+write_to_csv(filename=os.path.join(out_path, "exp_growth_delay.txt"),
+             fields=["inverse_delay", "chain_growth"],
+             x_values=adjusted_delay_values,
+             y_values=delay_growth_values,
+             delimiter="\t"
+             )
+
+
+write_to_csv(filename=os.path.join(out_path, "exp_growth_bandwidth.txt"),
+             fields=["bandwidth", "chain_growth"],
+             x_values=bw_values,
+             y_values=bw_growth_values,
+             delimiter="\t"
+             )
