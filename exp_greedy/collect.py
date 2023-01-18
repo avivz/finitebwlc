@@ -92,12 +92,6 @@ fig = px.scatter(records, x="bandwidth", y="max ancestor height",
                      "y": "Rate of chain growth",
                  }, log_x=args.logx)
 
-# fig.add_trace(px.scatter(records, x="bandwidth", y="max ancestor height",
-#                          color="download_rule",
-#                          labels={
-#                              "x": "Bandwidth",
-#                              "y": "Rate of chain growth",
-#                          }, log_x=args.logx).data[0])
 fig.update_layout(legend=dict(
     yanchor="top",
     y=0.98,
@@ -127,24 +121,21 @@ def write_to_csv(filename: str, fields: List[str], x_values: List[Any], y_values
             csv_writer.writerow(
                 [x_values[i], y_values[i]])
 
-# TODO adapt this! usage example:
-# write_to_csv(filename=os.path.join(out_path, "fig-experiment-growth-delay-data.txt"),
-#              fields=["inverse_delay", "chain_growth"],
-#              x_values=adjusted_delay_values,
-#              y_values=delay_growth_values,
-#              delimiter="\t"
-#              )
 
+write_to_csv(filename=os.path.join(out_path, "fig-experiment-greedy-greedydl-data.txt"),
+             fields=["bandwidth", "max_ancestor_height"],
+             x_values=[record["bandwidth"]
+                       for record in records if record["download_rule"] == "longest_header_chain"],
+             y_values=[record["chain growth"]
+                       for record in records if record["download_rule"] == "longest_header_chain"],
+             delimiter=" "
+             )
 
-csv_file = os.path.join(out_path, "exp_greedy.csv")
-
-print(f"Saving csv to {csv_file}")
-
-with open(csv_file, 'w') as csvfile:
-    csv_writer = csv.writer(csvfile)
-    csv_writer.writerow(["x_bandwidth", "y_chain_growth",
-                        "y_ancestor_height", "download_rule"])
-    for record in records:
-        csv_writer.writerow(
-            [record["bandwidth"], record["chain growth"], record["max ancestor height"],
-             record["download_rule"]])
+write_to_csv(filename=os.path.join(out_path, "fig-experiment-greedy-longestdl-data.txt"),
+             fields=["bandwidth", "max_ancestor_height"],
+             x_values=[record["bandwidth"]
+                       for record in records if record["download_rule"] == "longest_header_chain"],
+             y_values=[record["max ancestor height"]
+                       for record in records if record["download_rule"] == "longest_header_chain"],
+             delimiter=" "
+             )
