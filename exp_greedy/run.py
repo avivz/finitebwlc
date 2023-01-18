@@ -53,7 +53,7 @@ bandwidth_range = numpy.arange(-0.1, 2.001, 0.05)
 # bandwidth_range = numpy.power(10, bandwidth_range)
 
 
-num_repetitions = 100
+num_repetitions = 300
 
 
 num_skipped = 0
