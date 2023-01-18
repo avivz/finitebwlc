@@ -125,9 +125,9 @@ def write_to_csv(filename: str, fields: List[str], x_values: List[Any], y_values
 write_to_csv(filename=os.path.join(out_path, "fig-experiment-greedy-greedydl-data.txt"),
              fields=["bandwidth", "max_ancestor_height"],
              x_values=[record["bandwidth"]
-                       for record in records if record["download_rule"] == "longest_header_chain"],
+                       for record in records if record["download_rule"] == "greedy_extend_chain"],
              y_values=[record["chain growth"]
-                       for record in records if record["download_rule"] == "longest_header_chain"],
+                       for record in records if record["download_rule"] == "greedy_extend_chain"],
              delimiter=" "
              )
 
