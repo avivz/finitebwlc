@@ -71,7 +71,7 @@ class Experiment:
 
         if self.__config.equivocation_teasing_attacker:
             attacker3 = EquivocationTeasingPoWAttacker(self.__genesis,
-                                                       self.__config.teasing_attacker,
+                                                       self.__config.equivocation_teasing_attacker,
                                                        self.__network)
             self.__all_nodes.append(attacker3)
             for i in range(self.__config.attacker_head_start):
