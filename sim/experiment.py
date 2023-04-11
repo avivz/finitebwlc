@@ -17,9 +17,6 @@ from .teasing_pow_attacker import TeasingPoWAttacker
 from .equivocation_teasing_pow_attacker import EquivocationTeasingPoWAttacker
 from .configuration import RunConfig, DownloadRules
 
-import plotly.graph_objects as go  # type: ignore
-import plotly.express as px  # type: ignore
-
 
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 
@@ -153,6 +150,9 @@ class Experiment:
 
 
 def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_log: Dict[Node, List[Tuple[Block, float, float]]]) -> None:
+    import plotly.graph_objects as go  # type: ignore
+    import plotly.express as px  # type: ignore
+
     fig = go.Figure()
 
     width = 0.1
