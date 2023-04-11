@@ -53,7 +53,7 @@ base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.co
 # bandwidth_range = [1.0,]
 bandwidth_range = numpy.arange(0.1, 2.001, 0.10)
 # bandwidth_range = numpy.arange(0.1, 2.001, 0.05)
-num_repetitions = 1
+num_repetitions = 10
 # num_repetitions = 10
 
 

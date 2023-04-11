@@ -59,17 +59,20 @@ class EquivocationTeasingPoWAttacker(Node):
         #     exit(0)
 
     def _duplicate_and_announce_adversarial_chain_to_height(self, blk, target_height) -> Block:
-        if blk.height > target_height:
-            return self._duplicate_and_announce_adversarial_chain_to_height(blk.parent, target_height)
+        while blk.height > target_height:
+            blk = blk.parent
 
-        if blk.miner != self:
-            # Honest block, cannot duplicate further, probably announced and available
-            return blk
-        else:
-            blk_parent_new = self._duplicate_and_announce_adversarial_chain_to_height(
-                blk.parent, target_height)
-            blk_new = Block(self, blk_parent_new,
+        blks_to_dup = []
+        while blk.miner == self:
+            blks_to_dup.append(blk)
+            blk = blk.parent
+
+        blk_parent = blk
+        while len(blks_to_dup) > 0:
+            blk_to_dup = blks_to_dup.pop()
+            blk_new = Block(self, blk_parent,
                             EquivocationTeasingPoWAttacker.env.now)
+            blk_parent = blk_new
 
             if blk_new.height <= target_height - 1:
                 blk_new.is_available = True
@@ -78,7 +81,7 @@ class EquivocationTeasingPoWAttacker(Node):
                 blk_new.is_available = False
                 self._broadcast_header(blk_new)
 
-            return blk_new
+        return blk_parent
 
     def download_complete(self, block: Block) -> None:
         super().download_complete(block)
