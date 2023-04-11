@@ -45,6 +45,10 @@ def setup_parser() -> argparse.ArgumentParser:
                         help="include a teasing attacker with the given mining power (defaults to no attacker)",
                         default=0)
 
+    parser.add_argument("--" + RunConfig.EQUIVOCATION_TEASING_ATTACKER, metavar="MINING_POWER", type=float,
+                        help="include a equivocating teasing attacker with the given mining power (defaults to no attacker)",
+                        default=0)
+
     parser.add_argument("--" + RunConfig.ATTACKER_HEAD_START, metavar="NUM_BLOCKS", type=int,
                         help="give any attacker NUM_BLOCKS mining at the begining of the simulation. This only matters if an attacker is present.",
                         default=0)

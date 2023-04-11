@@ -10,10 +10,11 @@ from .honest_node_longest_header_chain import HonestNodeLongestHeaderChain
 from .honest_node_greedy_chain import HonestNodeGreedy
 from .dumb_attacker import DumbAttacker
 from .node import Node
-from .mining_oracle import PoWMiningOracle, PoSMiningOracle
+from .mining_oracle import PoWMiningOracle  # , PoSMiningOracle
 from .network import Network
 from .block import Block
 from .teasing_pow_attacker import TeasingPoWAttacker
+from .equivocation_teasing_pow_attacker import EquivocationTeasingPoWAttacker
 from .configuration import RunConfig, DownloadRules
 
 import plotly.graph_objects as go  # type: ignore
@@ -47,8 +48,8 @@ class Experiment:
             self.__mining_oracle: Union[PoWMiningOracle,
                                         PoSMiningOracle] = PoWMiningOracle(self.__env, self.__all_nodes)
         else:
-            self.__mining_oracle = PoSMiningOracle(self.__env,
-                                                   self.__all_nodes, run_config.pos_round_length, run_config.attacker_head_start)
+            # self.__mining_oracle = PoSMiningOracle(self.__env,
+            #                                        self.__all_nodes, run_config.pos_round_length, run_config.attacker_head_start)
             raise NotImplementedError("PoS is not fully implemented.")
         self.__run_time = run_config.run_time
 
@@ -67,6 +68,14 @@ class Experiment:
             self.__all_nodes.append(attacker2)
             for i in range(self.__config.attacker_head_start):
                 attacker2.mine_block()
+
+        if self.__config.equivocation_teasing_attacker:
+            attacker3 = EquivocationTeasingPoWAttacker(self.__genesis,
+                                                       self.__config.teasing_attacker,
+                                                       self.__network)
+            self.__all_nodes.append(attacker3)
+            for i in range(self.__config.attacker_head_start):
+                attacker3.mine_block()
 
         if self.__config.download_rule == DownloadRules.LongestHeaderChain.value:
             def node_factory() -> Node:
@@ -167,6 +176,7 @@ def plot_timeline(start_time: float, end_time: float, num_nodes: int, download_l
             fig.add_annotation(
                 x=(start+end)/2, y=node.id - height, xref='x', yref='y', text=str(block.id), opacity=0.3,
                 showarrow=False)
+
     # plotting of blocks using markers
     print("drawing block markers")
     x_vals = [block.creation_time for block in Block.all_blocks if start_time <=

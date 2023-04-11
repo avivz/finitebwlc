@@ -40,6 +40,9 @@ class RunConfig:
     TEASING_ATTACKER: ClassVar[str] = "teasing_attacker"
     teasing_attacker: float = 0
 
+    EQUIVOCATION_TEASING_ATTACKER: ClassVar[str] = "equivocation_teasing_attacker"
+    equivocation_teasing_attacker: float = 0
+
     ATTACKER_HEAD_START: ClassVar[str] = "attacker_head_start"
     attacker_head_start: int = 0
 

@@ -44,11 +44,14 @@ if not os.path.exists(DATA_PATH):
 base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
                   f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
 
-bandwidth_range = numpy.arange(0.1, 2.001, 0.05)
-# bandwidth_range = numpy.arange(-2, 5.001, 0.05)
-# bandwidth_range = numpy.power(10, bandwidth_range)
+# bandwidth_range = numpy.arange(0.1, 2.001, 0.05)
+# # bandwidth_range = numpy.arange(-2, 5.001, 0.05)
+# # bandwidth_range = numpy.power(10, bandwidth_range)
 
-num_repetitions = 100
+# num_repetitions = 100
+
+bandwidth_range = [1.0,]
+num_repetitions = 1
 
 
 num_skipped = 0
@@ -68,20 +71,34 @@ for rep in range(num_repetitions):
             [f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name2}",
                 f"--{sim.configuration.RunConfig.TEASING_ATTACKER} 1.0", f"--{sim.configuration.RunConfig.ATTACKER_HEAD_START} 100"]
 
+        file_name3 = os.path.join(
+            DATA_PATH, "exp2_teaser_equiv_" + str(index)+"_"+str(rep)+".json")
+        arguments3 = arguments1 + \
+            [f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name2}",
+                f"--{sim.configuration.RunConfig.EQUIVOCATION_TEASING_ATTACKER} 1.0", f"--{sim.configuration.RunConfig.ATTACKER_HEAD_START} 100"]
+
         cmd1 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments1)}"
         cmd2 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments2)}"
+        cmd3 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments3)}"
 
-        # (we already have those values from exp_teaser)
-        # if os.path.exists(file_name1) and os.path.getsize(file_name1) > 0:
-        #     print(f"SKIPPING {file_name1}")
-        #     num_skipped += 1
-        # else:
-        #     commands_to_run.append(cmd1)
+        # (note that we already have those values from exp_teaser ...)
+        if os.path.exists(file_name1) and os.path.getsize(file_name1) > 0:
+            print(f"SKIPPING {file_name1}")
+            num_skipped += 1
+        else:
+            commands_to_run.append(cmd1)
+
         if os.path.exists(file_name2) and os.path.getsize(file_name2) > 0:
             print(f"SKIPPING {file_name2}")
             num_skipped += 1
         else:
             commands_to_run.append(cmd2)
+
+        if os.path.exists(file_name3) and os.path.getsize(file_name3) > 0:
+            print(f"SKIPPING {file_name3}")
+            num_skipped += 1
+        else:
+            commands_to_run.append(cmd3)
 
 
 if args.slurm:
