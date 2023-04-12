@@ -45,8 +45,12 @@ base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.co
                   f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
 
 
-# linear1
-bandwidth_range = numpy.arange(0.1, 2.001, 0.20)
+# # linear1
+# bandwidth_range = numpy.arange(0.1, 2.001, 0.20)
+# num_repetitions = 10
+
+# linear2
+bandwidth_range = numpy.arange(0.1, 2.001, 0.05)
 num_repetitions = 10
 
 
@@ -77,18 +81,19 @@ for rep in range(num_repetitions):
         cmd2 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments2)}"
         cmd3 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments3)}"
 
-        # (note that we already have those values from exp_teaser ...)
-        if os.path.exists(file_name1) and os.path.getsize(file_name1) > 0:
-            print(f"SKIPPING {file_name1}")
-            num_skipped += 1
-        else:
-            commands_to_run.append(cmd1)
+        # # (note that we already have those values from exp_teaser ...)
+        # if os.path.exists(file_name1) and os.path.getsize(file_name1) > 0:
+        #     print(f"SKIPPING {file_name1}")
+        #     num_skipped += 1
+        # else:
+        #     commands_to_run.append(cmd1)
 
-        if os.path.exists(file_name2) and os.path.getsize(file_name2) > 0:
-            print(f"SKIPPING {file_name2}")
-            num_skipped += 1
-        else:
-            commands_to_run.append(cmd2)
+        # # (note that we already have those values from exp_teaser ...)
+        # if os.path.exists(file_name2) and os.path.getsize(file_name2) > 0:
+        #     print(f"SKIPPING {file_name2}")
+        #     num_skipped += 1
+        # else:
+        #     commands_to_run.append(cmd2)
 
         if os.path.exists(file_name3) and os.path.getsize(file_name3) > 0:
             print(f"SKIPPING {file_name3}")

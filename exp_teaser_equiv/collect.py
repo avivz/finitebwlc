@@ -124,7 +124,7 @@ def write_to_csv(filename: str, fields: List[str], x_values: List[Any], y_values
                 [x_values[i], y_values[i]])
 
 
-write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaser-noattacker-data.txt"),
+write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaserequiv-noattacker-data.txt"),
              fields=["bandwidth", "chain_growth"],
              x_values=[record["bandwidth"]
                        for record in records if record["attacker"] == "no-attack"],
@@ -133,7 +133,7 @@ write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaser-noattacker-d
              delimiter=" "
              )
 
-write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaser-teasingattacker-data.txt"),
+write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaserequiv-teasingattacker-data.txt"),
              fields=["bandwidth", "chain_growth"],
              x_values=[record["bandwidth"]
                        for record in records if record["attacker"] == "teasing-attacker"],
@@ -142,7 +142,7 @@ write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaser-teasingattac
              delimiter=" "
              )
 
-write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaser-equivteasingattacker-data.txt"),
+write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaserequiv-equivteasingattacker-data.txt"),
              fields=["bandwidth", "chain_growth"],
              x_values=[record["bandwidth"]
                        for record in records if record["attacker"] == "equiv-teasing-attacker"],
