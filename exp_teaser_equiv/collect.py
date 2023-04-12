@@ -55,9 +55,16 @@ for file_name in tqdm.tqdm(os.listdir(DATA_PATH)):
     run_time = content["config"]["run_time"]
     chain_height = content["honest_chain_height"]
     bandwidth = content["config"]["bandwidth"]
-    attacker = bool(content["config"]["teasing_attacker"] > 0)
+
+    attacker = ""
+    if content["config"]["teasing_attacker"] > 0:
+        attacker += "," if attacker else "" + "teasing-attacker"
+    if content["config"]["equivocation_teasing_attacker"] > 0:
+        attacker += "," if attacker else "" + "equiv-teasing-attacker"
+
     if (bandwidth, attacker) not in data:
         data[(bandwidth, attacker)] = []
+
     data[(bandwidth, attacker)].append(chain_height/run_time)
 
 
@@ -67,7 +74,7 @@ print("Computing traces...")
 records: List[Dict[str, Any]] = [
     {
         "bandwidth": record[0],
-        "attacker": "active attacker" if record[1] else "no attacker",
+        "attacker": record[1] if record[1] else "no-attack",
         "chain growth": sum(data[record]) / len(data[record]),
         "stdev": np.std(data[record])
     } for record in sorted(list(data))
@@ -76,33 +83,34 @@ records: List[Dict[str, Any]] = [
 
 print("Max stdev:", max(records,  key=(lambda x: x["stdev"])))  # type: ignore
 
-print("Creating plot...")
 
-fig = px.scatter(records, x="bandwidth", y="chain growth",
-                 # error_y=bw_error_values+delay_error_values,
-                 color="attacker",
-                 labels={
-                     "x": "Bandwidth",
-                     "y": "Rate of chain growth",
-                 }, log_x=args.logx)
+# print("Creating plot...")
 
-fig.update_layout(legend=dict(
-    yanchor="top",
-    y=0.98,
-    xanchor="left",
-    x=0.02
-))
+# fig = px.scatter(records, x="bandwidth", y="chain growth",
+#                  # error_y=bw_error_values+delay_error_values,
+#                  color="attacker",
+#                  labels={
+#                      "x": "Bandwidth",
+#                      "y": "Rate of chain growth",
+#                  }, log_x=args.logx)
+
+# fig.update_layout(legend=dict(
+#     yanchor="top",
+#     y=0.98,
+#     xanchor="left",
+#     x=0.02
+# ))
 
 out_path = os.path.join(BASE_OUT_PATH, args.data_dir[0])
-out_file = os.path.join(out_path, "fig_exp_teaser.svg")
-out_file2 = os.path.join(out_path, "fig_exp_teaser.png")
+# out_file = os.path.join(out_path, "fig_exp_teaser.svg")
+# out_file2 = os.path.join(out_path, "fig_exp_teaser.png")
 
 
-print(f"Saving plot to {out_file}, {out_file2}")
+# print(f"Saving plot to {out_file}, {out_file2}")
 if not os.path.exists(out_path):
     os.mkdir(out_path)
-fig.write_image(out_file)
-fig.write_image(out_file2)
+# fig.write_image(out_file)
+# fig.write_image(out_file2)
 
 
 def write_to_csv(filename: str, fields: List[str], x_values: List[Any], y_values: List[Any], delimiter: str = ",") -> None:
@@ -119,17 +127,26 @@ def write_to_csv(filename: str, fields: List[str], x_values: List[Any], y_values
 write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaser-noattacker-data.txt"),
              fields=["bandwidth", "chain_growth"],
              x_values=[record["bandwidth"]
-                       for record in records if record["attacker"] == "no attacker"],
+                       for record in records if record["attacker"] == "no-attack"],
              y_values=[record["chain growth"]
-                       for record in records if record["attacker"] == "no attacker"],
+                       for record in records if record["attacker"] == "no-attack"],
              delimiter=" "
              )
 
-write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaser-activeattacker-data.txt"),
+write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaser-teasingattacker-data.txt"),
              fields=["bandwidth", "chain_growth"],
              x_values=[record["bandwidth"]
-                       for record in records if record["attacker"] == "active attacker"],
+                       for record in records if record["attacker"] == "teasing-attacker"],
              y_values=[record["chain growth"]
-                       for record in records if record["attacker"] == "active attacker"],
+                       for record in records if record["attacker"] == "teasing-attacker"],
+             delimiter=" "
+             )
+
+write_to_csv(filename=os.path.join(out_path, "fig-experiment-teaser-equivteasingattacker-data.txt"),
+             fields=["bandwidth", "chain_growth"],
+             x_values=[record["bandwidth"]
+                       for record in records if record["attacker"] == "equiv-teasing-attacker"],
+             y_values=[record["chain growth"]
+                       for record in records if record["attacker"] == "equiv-teasing-attacker"],
              delimiter=" "
              )

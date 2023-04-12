@@ -74,10 +74,10 @@ class EquivocationTeasingPoWAttacker(Node):
                             EquivocationTeasingPoWAttacker.env.now)
             blk_parent = blk_new
 
-            if blk_new.height <= target_height - 1:
+            if blk_new.height < target_height - 1:
                 blk_new.is_available = True
                 self._broadcast_header(blk_new)
-            elif blk_new.height == target_height:
+            elif blk_new.height <= target_height:
                 blk_new.is_available = False
                 self._broadcast_header(blk_new)
 

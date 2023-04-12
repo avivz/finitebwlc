@@ -106,6 +106,7 @@ class Experiment:
                 self.__network.end_split()
 
         self.__env.run(until=self.__run_time)
+
         if self.__config.plot is not None:
             assert self.__download_log is not None
             plot_timeline(

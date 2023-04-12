@@ -51,10 +51,11 @@ base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.co
 # num_repetitions = 100
 
 # bandwidth_range = [1.0,]
-bandwidth_range = numpy.arange(0.1, 2.001, 0.10)
+# bandwidth_range = numpy.arange(0.1, 2.001, 0.10)
+bandwidth_range = numpy.arange(0.1, 2.001, 0.20)
 # bandwidth_range = numpy.arange(0.1, 2.001, 0.05)
+# num_repetitions = 1
 num_repetitions = 10
-# num_repetitions = 10
 
 
 num_skipped = 0
@@ -77,7 +78,7 @@ for rep in range(num_repetitions):
         file_name3 = os.path.join(
             DATA_PATH, "exp2_teaser_equiv_" + str(index)+"_"+str(rep)+".json")
         arguments3 = arguments1 + \
-            [f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name2}",
+            [f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name3}",
                 f"--{sim.configuration.RunConfig.EQUIVOCATION_TEASING_ATTACKER} 1.0", f"--{sim.configuration.RunConfig.ATTACKER_HEAD_START} 100"]
 
         cmd1 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments1)}"
