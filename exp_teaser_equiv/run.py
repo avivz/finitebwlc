@@ -44,17 +44,9 @@ if not os.path.exists(DATA_PATH):
 base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
                   f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
 
-# bandwidth_range = numpy.arange(0.1, 2.001, 0.05)
-# # bandwidth_range = numpy.arange(-2, 5.001, 0.05)
-# # bandwidth_range = numpy.power(10, bandwidth_range)
 
-# num_repetitions = 100
-
-# bandwidth_range = [1.0,]
-# bandwidth_range = numpy.arange(0.1, 2.001, 0.10)
+# linear1
 bandwidth_range = numpy.arange(0.1, 2.001, 0.20)
-# bandwidth_range = numpy.arange(0.1, 2.001, 0.05)
-# num_repetitions = 1
 num_repetitions = 10
 
 
