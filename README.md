@@ -1,4 +1,4 @@
-# finitebwlc-experiments
+# Experiments for Nakamoto Consensus under Congestion
 
 ## Requirements:
 Python 3.7 or above.
@@ -12,18 +12,19 @@ At the root directory of the repository:
 
 Then from the root project directory the following commands can be executed:
 - `> python -m sim.run_experiment [OPTIONS]`   Will run a single simulation trace
+- `> python -m exp_teaser.run [OPTIONS]` Runs a set of experiments on the teasing attack (PoW + PoS)
+- `> python -m exp_teaser.collect [OPTIONS]` Collects the results from experiments
+- `> python -m exp_teaser_equiv.run [OPTIONS]` Runs a set of experiments on the equivocation teasing attack (PoS)
+- `> python -m exp_teaser_equiv.collect [OPTIONS]` Collects the results from experiments
 - `> python -m exp_greedy.run [OPTIONS]`  Runs a set of experiments on the greedy rule
 - `> python -m exp_greedy.collect [OPTIONS]` Collects the results from experiments
-- `> python -m exp_teaser.run [OPTIONS]` Runs a set of experiments on the teasing attack
-- `> python -m exp_teaser.collect [OPTIONS]` Collects the results from experiments
 
 
 ## Running an experiment
 ### To run an experiment
 `> python -m exp_*.run [-h] --data_dir DATA_DIR [--slurm] [--no_out]`
 
-
-optional arguments:
+Optional arguments:
 ```
   -h, --help           show a help message and exit
   --data_dir DATA_DIR  where to save results within the data directory
@@ -35,21 +36,20 @@ optional arguments:
 
 `> python -m exp_*.collect [-h] [--logx] --data_dir DATA_DIR`
 
-
-optional arguments:
+Optional arguments:
 ```
   -h, --help           show a help message and exit
   --logx               makes x axis logscale
   --data_dir DATA_DIR  where to find results within the data directory
 ```
 
-## Runing a single simulation trace:
+## Running a single simulation trace:
 
 ```
 > python -m run_experiment [-h] [--verbose] [--plot START END] [--induce_split START END] --mode {pos,pow} [--pos_round_length SECs] [--dumb_attacker MINING_POWER] [--teasing_attacker MINING_POWER] [--attacker_head_start NUM_BLOCKS] --run_time RUN_TIME [--download_rule {longest_header_chain,greedy_extend_chain}] --num_honest NUM_HONEST --honest_block_rate HONEST_BLOCK_RATE --bandwidth BANDWIDTH --header_delay HEADER_DELAY [--save_results SAVE_RESULTS]
 ```
 
-Run a basic experiment of the mining simulation. Specify a configuration file with @<filename>.
+Run a basic experiment of the mining simulation.
 
 Optional arguments:
 ```
@@ -58,13 +58,15 @@ Optional arguments:
   --plot START END      plot a block diagram from <START> to <END> times
   --induce_split START END 
                         split the network from <START> to <END> times
-  --mode {pos,pow}      which mode of operation we are using
+  --mode {pos,pow}      which mode of operation we are using (currently ineffective, always use "pow"!)
   --pos_round_length SECs
                         How long the mining round is in PoS (valid only in PoS mode, defaults to 1sec)
   --dumb_attacker MINING_POWER
                         include an attacker with the given mining power (defaults to no attacker)
   --teasing_attacker MINING_POWER
                         include a teasing attacker with the given mining power (defaults to no attacker)
+  --equivocation_teasing_attacker MINING_POWER
+                        include an equivocation teasing attacker with the given mining power (defaults to no attacker)
   --attacker_head_start NUM_BLOCKS
                         give any attacker NUM_BLOCKS mining at the begining of the simulation. This only matters if an attacker is present.
   --run_time RUN_TIME   time to run

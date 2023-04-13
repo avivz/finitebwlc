@@ -31,7 +31,7 @@ def setup_parser() -> argparse.ArgumentParser:
                         help="split the network from <START> to <END> times")
 
     parser.add_argument("--" + RunConfig.MODE, choices=[
-                        'pos', 'pow'], help="which mode of operation we are using", required=True)
+                        'pos', 'pow'], help="which mode of operation we are using (currently ineffective, always use pow!)", required=True)
 
     parser.add_argument("--" + RunConfig.POS_ROUND_LENGTH, metavar="SECs",
                         help="How long the mining round is in PoS (valid only in PoS mode, defaults to 1sec)",
