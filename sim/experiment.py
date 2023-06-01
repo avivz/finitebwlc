@@ -3,7 +3,8 @@ import dataclasses
 from typing import List, Generator, Optional, Tuple, Any, Dict, Union
 
 import tqdm
-import simpy
+import simpy.core
+import simpy.events
 import os
 
 from .honest_node_longest_header_chain import HonestNodeLongestHeaderChain
@@ -11,7 +12,7 @@ from .honest_node_greedy_chain import HonestNodeGreedy
 from .dumb_attacker import DumbAttacker
 from .private_attacker import PrivateAttacker
 from .node import Node
-from .mining_oracle import PoWMiningOracle  # , PoSMiningOracle
+from .mining_oracle import PoWMiningOracle, PoSMiningOracle
 from .network import Network
 from .block import Block
 from .teasing_pow_attacker import TeasingPoWAttacker

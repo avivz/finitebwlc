@@ -58,16 +58,18 @@ class EquivocationTeasingPoWAttacker(Node):
         #     print("}")
         #     exit(0)
 
-    def _duplicate_and_announce_adversarial_chain_to_height(self, blk, target_height) -> Block:
-        while blk.height > target_height:
-            blk = blk.parent
+    def _duplicate_and_announce_adversarial_chain_to_height(self, block: Block, target_height: int) -> Block:
+        while block.height > target_height:
+            assert block.parent is not None
+            block = block.parent
 
         blks_to_dup = []
-        while blk.miner == self:
-            blks_to_dup.append(blk)
-            blk = blk.parent
+        while block.miner == self:
+            blks_to_dup.append(block)
+            assert block.parent is not None
+            block = block.parent
 
-        blk_parent = blk
+        blk_parent = block
         while len(blks_to_dup) > 0:
             blk_to_dup = blks_to_dup.pop()
             blk_new = Block(self, blk_parent,
