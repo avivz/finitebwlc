@@ -10,8 +10,8 @@ class EquivocationTeasingPoWAttacker(Node):
     thus, a node that downloads towards the longest tip always first downloads *equivocating* block of this attacker
     up to the height matching the new honest block."""
 
-    def __init__(self, genesis: Block, mining_rate: float, network: network.Network) -> None:
-        super().__init__(genesis, mining_rate, bandwidth=0, header_delay=0, network=network)
+    def __init__(self, node_id: str, genesis: Block, mining_rate: float, network: network.Network) -> None:
+        super().__init__(node_id, genesis, mining_rate, network=network)
         self._tip = genesis
         # this is the tip of the chain this node has allowed others to download.
         self._last_available = genesis
@@ -72,16 +72,16 @@ class EquivocationTeasingPoWAttacker(Node):
         blk_parent = block
         while len(blks_to_dup) > 0:
             blk_to_dup = blks_to_dup.pop()
-            blk_new = Block(self, blk_parent,
-                            EquivocationTeasingPoWAttacker.env.now)
-            blk_parent = blk_new
+            block_new = Block(self, blk_parent,
+                              EquivocationTeasingPoWAttacker.env.now)
+            blk_parent = block_new
 
-            if blk_new.height < target_height - 1:
-                blk_new.is_available = True
-                self._broadcast_header(blk_new)
-            elif blk_new.height <= target_height:
-                blk_new.is_available = False
-                self._broadcast_header(blk_new)
+            if block_new.height < target_height - 1:
+                block_new.is_available = True
+                self._broadcast_header(block_new)
+            elif block_new.height <= target_height:
+                block_new.is_available = False
+                self._broadcast_header(block_new)
 
         return blk_parent
 

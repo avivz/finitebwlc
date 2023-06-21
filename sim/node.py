@@ -1,6 +1,6 @@
 
 from abc import ABC
-from typing import Set, ClassVar, Optional
+from typing import Set, Optional, Dict
 from .block import Block
 import sim.network as network
 import simpy.events
@@ -8,27 +8,31 @@ import simpy.core
 import logging
 import pylru  # type: ignore
 import json
+from dataclasses import dataclass
+
+
+@dataclass
+class Connection:
+    node: 'Node'
+    bandwidth: float
+    delay: float
 
 
 class Node(ABC):
-    __next_id: ClassVar[int] = 0
     env: simpy.core.Environment
 
-    def __init__(self, genesis: Block, mining_rate: float, bandwidth: float, header_delay: float,
-                 network: network.Network, partial_block_cache_size: int = 10) -> None:
+    def __init__(self, node_id: str, genesis: Block, mining_rate: float, network: network.Network, partial_block_cache_size: int = 10) -> None:
         # set a unique id:
-        self.__id = Node.__next_id
-        Node.__next_id += 1
+        self.__id = node_id
         self.__hash = hash(self.__id)
         self.__description = f"{self.__class__.__name__}_{self.id}"
 
         self.__mining_rate = mining_rate
-        self.__bandwidth = bandwidth
-        self.__header_delay = header_delay
 
         # connect to the network
         network.connect(self)
         self.__network = network
+        self.__connections: Dict["Node", Connection] = dict()
 
         # mining target:
         self._mining_target = genesis
@@ -49,19 +53,20 @@ class Node(ABC):
         return self.__mining_rate
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         return self.__id
-
-    @property
-    def bandwidth(self) -> float:
-        return self.__bandwidth
-
-    @property
-    def header_delay(self) -> float:
-        return self.__header_delay
 
     def __str__(self) -> str:
         return self.__description
+
+    def connect(self, other: 'Node', bandwidth: float, delay: float) -> None:
+        self.__connections[other] = Connection(other, bandwidth, delay)
+        other.__connections[self] = Connection(self, bandwidth, delay)
+
+    def disconnect(self, other: 'Node') -> None:
+        # TODO remove scheduled events on the connection
+        del self.__connections[other]
+        del other.__connections[self]
 
     def mine_block(self) -> Block:
         """This method is called externally by the mining oracle.
@@ -132,4 +137,3 @@ class Node(ABC):
         logging.getLogger("SIM_INFO").info(message)
 
         self._partial_blocks[block] = cummulative_fraction_downloaded
-        # TODO handle partial downloads here. Currently partial downloads are discarded.

@@ -10,10 +10,8 @@ class TeasingPoWAttacker(Node):
     it always releases 2 headers ahead but allows download only one header ahead
     thus, a node that downloads towards the longest tip always first downloads the matching block of this attacker."""
 
-    def __init__(self, genesis: Block, mining_rate: float, network: network.Network) -> None:
-        super().__init__(genesis, mining_rate, bandwidth=0, header_delay=0, network=network)
-
-        # this is the tip of the chain this node is mining on:
+    def __init__(self, node_id: str, genesis: Block, mining_rate: float, network: network.Network) -> None:
+        super().__init__(node_id, genesis, mining_rate, network=network)
         self._tip = genesis
 
         # this is the tip of the chain this node has allowed others to download.

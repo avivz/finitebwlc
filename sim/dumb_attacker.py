@@ -5,8 +5,8 @@ import sim.network as network
 
 
 class DumbAttacker(Node):
-    def __init__(self, genesis: Block, mining_rate: float, network: network.Network) -> None:
-        super().__init__(genesis, mining_rate, bandwidth=0, header_delay=0, network=network)
+    def __init__(self, node_id: str, genesis: Block, mining_rate: float, network: network.Network) -> None:
+        super().__init__(node_id, genesis, mining_rate, network=network)
         self._tip = genesis
 
     def mine_block(self) -> Block:
