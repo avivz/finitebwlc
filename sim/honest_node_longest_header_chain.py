@@ -7,9 +7,8 @@ from .limitted_queue import LimittedQueue
 
 
 class HonestNodeLongestHeaderChain(Node):
-    def __init__(self, genesis: Block, mining_rate: float, bandwidth: float,
-                 header_delay: float, network: network.Network) -> None:
-        super().__init__(genesis, mining_rate, bandwidth, header_delay, network)
+    def __init__(self, node_id: str, genesis: Block, mining_rate: float, network: network.Network) -> None:
+        super().__init__(node_id, genesis, mining_rate, network)
         self.__dl_queue: LimittedQueue[Block,
                                        int] = LimittedQueue(buffer_size=100)
 

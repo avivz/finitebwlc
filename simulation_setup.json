@@ -1,0 +1,43 @@
+{
+    "run_time": 1000,
+    "mode": "pow",
+    "events": [
+        {
+            "event_type": "add_node",
+            "time": 0,
+            "node": {
+                "node_id": "node1",
+                "node_type": "honest_miner",
+                "download_rule": "longest_header_chain",
+                "mining_rate": 1.0
+            }
+        },
+        {
+            "event_type": "add_node",
+            "time": 1,
+            "node": {
+                "node_id": "node2",
+                "node_type": "attacker",
+                "mining_rate": 1.0
+            }
+        },
+        {
+            "event_type": "connect_nodes",
+            "time": 10,
+            "connection": {
+                "node_id1": "node1",
+                "node_id2": "node2",
+                "delay": 0.0,
+                "bandwidth": 1
+            }
+        },
+        {
+            "event_type": "disconnect_nodes",
+            "time": 200,
+            "connection": {
+                "node_id1": "node1",
+                "node_id2": "node2"
+            }
+        }
+    ]
+}
