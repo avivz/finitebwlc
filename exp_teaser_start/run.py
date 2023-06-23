@@ -42,15 +42,13 @@ if not os.path.exists(DATA_PATH):
 
 # base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
 #                   f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
-base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 1000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
-                  f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
+base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 500", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
+                  f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} {2/3/100}", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
 # TODO: return to the old run_time of 10000
 
-bandwidth_range = numpy.arange(0.1, 2.001, 0.05)
+bandwidth_range = numpy.arange(0.1, 2.001, 0.5)
 
-num_repetitions = 1  # 100 #TODO return to 100
-
-# TODO add log for attacker lead over honest chain.
+num_repetitions = 100
 
 num_skipped = 0
 commands_to_run: List[str] = []
@@ -65,7 +63,7 @@ for rep in range(num_repetitions):
 
         arguments = base_arguments + [f"--{sim.configuration.RunConfig.BANDWIDTH} {bandwidth}", f"--{sim.configuration.RunConfig.SAVE_RESULTS} {results_file_name}",
                                       f"--{sim.configuration.RunConfig.LOG_BLOCKS} {block_log_file_name}",
-                                      f"--{sim.configuration.RunConfig.TEASING_ATTACKER} 0.5"]
+                                      f"--{sim.configuration.RunConfig.TEASING_ATTACKER} {1/3}"]
 
         cmd = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments)}"
 
@@ -91,4 +89,4 @@ for command in tqdm.tqdm(commands_to_run):
 print(f"\n\nskipped: {num_skipped}, ran: {len(commands_to_run)}.")
 
 # Sample run command:
-# python -m exp_teaser_start.run --data_dir test --slurm --no_out
+# python -m exp_teaser_start.run --data_dir exp1 --slurm --no_out
