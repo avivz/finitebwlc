@@ -12,3 +12,5 @@ __pycache__/
 exp_growth/data/*/*.json
 exp_teaser/data/*/*.json
 exp_greedy/data/*/*.json
+exp_teaser_start/data/*/*.json
+exp_teaser_start/data/*/*.log
