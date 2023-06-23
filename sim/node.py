@@ -7,6 +7,7 @@ import simpy.events
 import simpy.core
 import logging
 import pylru  # type: ignore
+import json
 
 
 class Node(ABC):
@@ -70,6 +71,11 @@ class Node(ABC):
         message = f"Mining t={Node.env.now:.2f}: Node {self} mines block {block}"
         logging.getLogger("SIM_INFO").info(message)
 
+        assert block.miner is not None
+        assert block.parent is not None
+        details = {"creation_time": block.creation_time, "miner": block.miner.id,
+                   "parent": block.parent.id, "height": block.height, "block_id": block.id}
+        logging.getLogger("BLOCK_LOG").info(json.dumps(details))
         self._downloaded_blocks.add(block)
         self._mining_target = block
         return block

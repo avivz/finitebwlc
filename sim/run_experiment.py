@@ -73,6 +73,9 @@ def setup_parser() -> argparse.ArgumentParser:
 
     parser.add_argument('--' + RunConfig.SAVE_RESULTS, default="", type=str,
                         help="filename (Where to save the results of the simulation)")
+
+    parser.add_argument('--' + RunConfig.LOG_BLOCKS, default="", type=str,
+                        help="filename (Where to save a log of the blocks created during the simulation)")
     return parser
 
 
@@ -81,13 +84,21 @@ if __name__ == "__main__":
     run_cfg = RunConfig()
     parser.parse_args(namespace=run_cfg)
 
+    if run_cfg.log_blocks:
+        logger = logging.getLogger("BLOCK_LOG")
+        logger.setLevel(logging.INFO)
+
+        handler = logging.FileHandler(run_cfg.log_blocks, mode='w')
+        handler.setLevel(logging.INFO)
+        logger.addHandler(handler)
+
     if run_cfg.verbose:
         logger = logging.getLogger("SIM_INFO")
         logger.setLevel(logging.INFO)
 
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.INFO)
-        logger.addHandler(handler)
+        handler2 = logging.StreamHandler(sys.stdout)
+        handler2.setLevel(logging.INFO)
+        logger.addHandler(handler2)
 
     experiment = Experiment(run_cfg)
     experiment.run_experiment()

@@ -55,6 +55,9 @@ class RunConfig:
     SAVE_RESULTS: ClassVar[str] = "save_results"
     save_results: str = ""
 
+    LOG_BLOCKS: ClassVar[str] = "log_blocks"
+    log_blocks: str = ""
+
     VERBOSE: ClassVar[str] = "verbose"
     verbose: bool = False
 
