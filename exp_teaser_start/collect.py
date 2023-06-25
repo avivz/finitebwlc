@@ -116,7 +116,7 @@ if not os.path.exists(os.path.join(BASE_OUT_PATH, args.data_dir[0])):
 
 # Now save a csv file with the data into the results subdir
 print("Saving results...")
-with open(os.path.join(BASE_OUT_PATH, args.data_dir[0], "exp_teaser_start.csv"), "w") as file:
+with open(os.path.join(BASE_OUT_PATH, args.data_dir[0], "fig-experiment-teaser-start-data.txt"), "w") as file:
     file.write("time,height_delta,beta\n")
     for sample in plot_data:
         file.write(
