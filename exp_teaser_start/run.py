@@ -40,36 +40,40 @@ DATA_PATH = os.path.join(DATA_ROOT_PATH, args.data_dir[0])
 if not os.path.exists(DATA_PATH):
     os.mkdir(DATA_PATH)
 
-# base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
-#                   f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
-base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 500", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", f"--{sim.configuration.RunConfig.MODE} pow",
-                  f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} {2/3/100}", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
-# TODO: return to the old run_time of 10000
+block_rate = 4
+bandwidth = 1
+attacker_rates = [0.2, 0.14, 0.04]
+num_honest = 100
+num_repetitions = 10
 
-bandwidth_range = numpy.arange(0.1, 2.001, 0.5)
 
-num_repetitions = 100
+base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 500", f"--{sim.configuration.RunConfig.NUM_HONEST} {num_honest}", f"--{sim.configuration.RunConfig.MODE} pow",
+                  f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
 
-num_skipped = 0
+# bandwidth_range = numpy.arange(0.1, 2.001, 0.5)
+
+skip_count = 0
 commands_to_run: List[str] = []
 
 for rep in range(num_repetitions):
-    for index, bandwidth in enumerate(bandwidth_range):
-
+    for index, attacker_rate in enumerate(attacker_rates):
         results_file_name = os.path.join(
-            DATA_PATH, "exp2_teaser_" + str(index)+"_"+str(rep)+".json")
+            DATA_PATH, "exp_teaser_start_" + str(index)+"_"+str(rep)+".json")
         block_log_file_name = os.path.join(
-            DATA_PATH, "exp2_teaser_" + str(index)+"_"+str(rep)+".log")
+            DATA_PATH, "exp_teaser_start_" + str(index)+"_"+str(rep)+".log")
 
-        arguments = base_arguments + [f"--{sim.configuration.RunConfig.BANDWIDTH} {bandwidth}", f"--{sim.configuration.RunConfig.SAVE_RESULTS} {results_file_name}",
+        arguments = base_arguments + [f"--{sim.configuration.RunConfig.BANDWIDTH} {bandwidth}",
+                                      f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} {(1-attacker_rate)*block_rate/num_honest}",
+                                      f"--{sim.configuration.RunConfig.TEASING_ATTACKER} {attacker_rate*block_rate}",
+                                      f"--{sim.configuration.RunConfig.SAVE_RESULTS} {results_file_name}",
                                       f"--{sim.configuration.RunConfig.LOG_BLOCKS} {block_log_file_name}",
-                                      f"--{sim.configuration.RunConfig.TEASING_ATTACKER} {1/3}"]
+                                      ]
 
         cmd = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments)}"
 
         if os.path.exists(results_file_name) and os.path.getsize(results_file_name) > 0:
             print(f"SKIPPING {results_file_name}")
-            num_skipped += 1
+            skip_count += 1
         else:
             commands_to_run.append(cmd)
 
@@ -86,7 +90,7 @@ for command in tqdm.tqdm(commands_to_run):
 
     os.system(command)
 
-print(f"\n\nskipped: {num_skipped}, ran: {len(commands_to_run)}.")
+print(f"\n\nskipped: {skip_count}, ran: {len(commands_to_run)}.")
 
 # Sample run command:
 # python -m exp_teaser_start.run --data_dir exp1 --slurm --no_out

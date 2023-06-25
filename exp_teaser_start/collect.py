@@ -12,15 +12,17 @@ BASE_PATH = os.path.split(os.path.abspath(__file__))[0]
 PYTHON_PATH = "python"
 BASE_DATA_PATH = os.path.join(BASE_PATH, "data/")
 
+selected_files = ["exp_teaser_start_0_1.log",
+                  "exp_teaser_start_1_0.log",
+                  "exp_teaser_start_2_0.log"
+                  ]
+
 
 def setup_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog='collect',
         description='Analyzes results of the experiment',
         fromfile_prefix_chars='@')
-
-    # parser.add_argument('--logx',
-    #                     action='store_true', help="makes x axis logscale")  # on/off flag
 
     parser.add_argument('--data_dir',
                         nargs=1, help="where to find results within the data directory", required=True, type=str)
@@ -43,7 +45,7 @@ data: Dict[Tuple[float, bool], List[float]] = dict()
 def read_data_from_log(file_name: str) -> List[Dict[str, Any]]:
     attacker_height = 0
     honest_height = 0
-    plot_data = []
+    block_data = []
     with open(os.path.join(DATA_PATH, file_name), "r") as file:
         lines = file.readlines()
         for line in lines:
@@ -55,45 +57,67 @@ def read_data_from_log(file_name: str) -> List[Dict[str, Any]]:
                 honest_height = record["height"]
                 if honest_height > attacker_height:
                     attacker_height = honest_height
-            plot_data.append(
+            block_data.append(
                 {"time": record["creation_time"], "height_delta": attacker_height-honest_height})
-    return plot_data
+    return block_data
 
 
-def get_trace_averages(base_file_name: str, times: np.ndarray[Any, np.dtype[Any]]) -> List[float]:
-
-    single_trace_data = []
-    for i in range(10):
-        file_name = base_file_name+str(i)+".log"
-        plot_data = read_data_from_log(file_name)
-        single_trace_data.append(plot_data)
-
-    average_of_deltas = []
-    print("Processing data...")
+def sample_data_at_times(block_data: List[Dict[str, Any]], times: List[float]) -> List[Dict[str, Any]]:
+    sampled_data = []
     for time in times:
-        deltas = []
-        for plot_data in single_trace_data:
-            for record in plot_data:
-                if record["time"] > time:
-                    deltas.append(record["height_delta"])
-                    break
-        average_of_deltas.append(np.mean(deltas))
-    return average_of_deltas
+        for block in block_data:
+            if block["time"] >= time:
+                sampled_data.append(
+                    {"time": time, "height_delta": block["height_delta"]})
+                break
+    return sampled_data
 
 
-base_file_name = "exp2_teaser_"
-times = np.arange(0, 400, 1, dtype=float)
+def read_config_file(file_name: str) -> Dict[str, Any]:
+    with open(os.path.join(DATA_PATH, file_name), "r") as file:
+        config = json.load(file)
+        return config  # type: ignore
+
+
+MAX_TIME = 120
+# times = np.arange(0, 120, 1, dtype=float)
+
+plot_data: List[Dict[str, Any]] = list()
+
+
+print("Reading data...")
+for file_name in selected_files:
+    if file_name.endswith(".log"):
+        config = read_config_file(file_name.replace(".log", ".json"))
+        block_data = read_data_from_log(file_name)
+        filtered_data = [
+            block for block in block_data if block["time"] <= MAX_TIME]
+        plot_data.extend(
+            dict(config["config"], **sample) for sample in filtered_data
+        )
+
+print(plot_data[0], "\n")
+
 
 print("Plotting...")
-fig = go.Figure()
-for i in range(4):
-    file_name = base_file_name+str(i)+"_"
-    average_of_deltas = get_trace_averages(file_name, times)
+# plot a line for each bandwidth x attacker_rate combination
 
-    fig.add_trace(go.Scatter(x=times, y=average_of_deltas,
-                             mode='lines',
-                             name=file_name))
+fig = px.line(plot_data, x="time", y="height_delta", color="teasing_attacker",
+              )
 
-fig.update_layout(title='Average Lead of attacker over honest',
-                  xaxis_title='Time', yaxis_title='Average (Attacker Chain - Honest Chain) length')
+
+fig.update_layout(title='Lead of attacker over honest',
+                  xaxis_title='Time', yaxis_title='(Attacker Chain - Honest Chain) length')
 fig.show()
+
+# create the target directory if it doesn't exist
+if not os.path.exists(os.path.join(BASE_OUT_PATH, args.data_dir[0])):
+    os.mkdir(os.path.join(BASE_OUT_PATH, args.data_dir[0]))
+
+# Now save a csv file with the data into the results subdir
+print("Saving results...")
+with open(os.path.join(BASE_OUT_PATH, args.data_dir[0], "exp_teaser_start.csv"), "w") as file:
+    file.write("time,height_delta,beta\n")
+    for sample in plot_data:
+        file.write(
+            f"{sample['time']},{sample['height_delta']},{sample['teasing_attacker']}\n")
