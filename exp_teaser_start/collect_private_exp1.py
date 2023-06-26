@@ -95,8 +95,7 @@ for file_name in selected_files:
 print("Plotting...")
 # plot a line for each bandwidth x attacker_rate combination
 
-fig = px.line(plot_data, x="time", y="height_delta", color="private_attacker",
-              )
+fig = px.line(plot_data, x="time", y="height_delta", color="private_attacker")
 
 
 fig.update_layout(title='Lead of attacker over honest',
@@ -113,4 +112,4 @@ with open(os.path.join(BASE_OUT_PATH, DATA_SUB_PATH, "fig-experiment-private-sta
     file.write("time,height_delta,beta\n")
     for sample in plot_data:
         file.write(
-            f"{sample['time']},{sample['height_delta']},{sample['teasing_attacker']}\n")
+            f"{sample['time']},{sample['height_delta']},{sample['private_attacker']}\n")
