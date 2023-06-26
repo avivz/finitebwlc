@@ -77,7 +77,6 @@ def read_config_file(file_name: str) -> Dict[str, Any]:
 
 
 MAX_TIME = 120
-# times = np.arange(0, 120, 1, dtype=float)
 
 plot_data: List[Dict[str, Any]] = list()
 
