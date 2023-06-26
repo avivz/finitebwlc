@@ -11,7 +11,7 @@ import argparse
 BASE_PATH = os.path.split(os.path.abspath(__file__))[0]
 PYTHON_PATH = "python"
 BASE_DATA_PATH = os.path.join(BASE_PATH, "data/")
-
+DATA_SUB_PATH = "exp1"
 selected_files = ["exp_teaser_start_0_1.log",
                   "exp_teaser_start_1_0.log",
                   "exp_teaser_start_2_0.log"
@@ -24,9 +24,6 @@ def setup_parser() -> argparse.ArgumentParser:
         description='Analyzes results of the experiment',
         fromfile_prefix_chars='@')
 
-    parser.add_argument('--data_dir',
-                        nargs=1, help="where to find results within the data directory", required=True, type=str)
-
     return parser
 
 
@@ -34,7 +31,7 @@ parser = setup_parser()
 args = parser.parse_args()
 
 
-DATA_PATH = os.path.join(BASE_DATA_PATH, args.data_dir[0])
+DATA_PATH = os.path.join(BASE_DATA_PATH, DATA_SUB_PATH)
 BASE_OUT_PATH = os.path.join(BASE_PATH, "results/")
 if not os.path.exists(BASE_OUT_PATH):
     os.mkdir(BASE_OUT_PATH)
@@ -96,9 +93,6 @@ for file_name in selected_files:
             dict(config["config"], **sample) for sample in filtered_data
         )
 
-print(plot_data[0], "\n")
-
-
 print("Plotting...")
 # plot a line for each bandwidth x attacker_rate combination
 
@@ -111,12 +105,12 @@ fig.update_layout(title='Lead of attacker over honest',
 fig.show()
 
 # create the target directory if it doesn't exist
-if not os.path.exists(os.path.join(BASE_OUT_PATH, args.data_dir[0])):
-    os.mkdir(os.path.join(BASE_OUT_PATH, args.data_dir[0]))
+if not os.path.exists(os.path.join(BASE_OUT_PATH, DATA_SUB_PATH)):
+    os.mkdir(os.path.join(BASE_OUT_PATH, DATA_SUB_PATH))
 
 # Now save a csv file with the data into the results subdir
 print("Saving results...")
-with open(os.path.join(BASE_OUT_PATH, args.data_dir[0], "fig-experiment-teaser-start-data.txt"), "w") as file:
+with open(os.path.join(BASE_OUT_PATH, DATA_SUB_PATH, "fig-experiment-teaser-start-data.txt"), "w") as file:
     file.write("time,height_delta,beta\n")
     for sample in plot_data:
         file.write(

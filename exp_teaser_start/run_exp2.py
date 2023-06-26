@@ -13,9 +13,6 @@ def setup_parser() -> argparse.ArgumentParser:
         description='Runs the experiment',
         fromfile_prefix_chars='@')
 
-    parser.add_argument('--data_dir',
-                        nargs=1, help="where to save results within the data directory", required=True, type=str)
-
     parser.add_argument('--slurm',
                         action='store_true', help="runs the code in parallel on slurm using sbatch")  # on/off flag
     parser.add_argument('--no_out',
@@ -25,7 +22,7 @@ def setup_parser() -> argparse.ArgumentParser:
 
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 SIMULATION_MODULE = "sim.run_experiment"
-
+DATA_DIR = "exp2"
 PYTHON_PATH = "python"
 
 DATA_ROOT_PATH = os.path.join(os.path.split(
@@ -36,21 +33,19 @@ if not os.path.exists(DATA_ROOT_PATH):
 parser = setup_parser()
 args = parser.parse_args()
 
-DATA_PATH = os.path.join(DATA_ROOT_PATH, args.data_dir[0])
+DATA_PATH = os.path.join(DATA_ROOT_PATH, DATA_DIR)
 if not os.path.exists(DATA_PATH):
     os.mkdir(DATA_PATH)
 
-block_rate = 4
+block_rate = 1/2
 bandwidth = 1
-attacker_rates = [0.2, 0.14, 0.04]
+attacker_rates = [0.45, 0.4, 0.35, 0.3]
 num_honest = 100
 num_repetitions = 10
 
 
-base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 500", f"--{sim.configuration.RunConfig.NUM_HONEST} {num_honest}", f"--{sim.configuration.RunConfig.MODE} pow",
+base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 2000", f"--{sim.configuration.RunConfig.NUM_HONEST} {num_honest}", f"--{sim.configuration.RunConfig.MODE} pow",
                   f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
-
-# bandwidth_range = numpy.arange(0.1, 2.001, 0.5)
 
 skip_count = 0
 commands_to_run: List[str] = []
@@ -93,4 +88,4 @@ for command in tqdm.tqdm(commands_to_run):
 print(f"\n\nskipped: {skip_count}, ran: {len(commands_to_run)}.")
 
 # Sample run command:
-# python -m exp_teaser_start.run --data_dir exp1 --slurm --no_out
+# python -m exp_teaser_start.run_exp2
