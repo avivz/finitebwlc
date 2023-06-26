@@ -37,6 +37,9 @@ class RunConfig:
     DUMB_ATTACKER: ClassVar[str] = "dumb_attacker"
     dumb_attacker: float = 0
 
+    PRIVATE_ATTACKER: ClassVar[str] = "private_attacker"
+    private_attacker: float = 0
+
     TEASING_ATTACKER: ClassVar[str] = "teasing_attacker"
     teasing_attacker: float = 0
 

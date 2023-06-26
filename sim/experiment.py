@@ -9,6 +9,7 @@ import os
 from .honest_node_longest_header_chain import HonestNodeLongestHeaderChain
 from .honest_node_greedy_chain import HonestNodeGreedy
 from .dumb_attacker import DumbAttacker
+from .private_attacker import PrivateAttacker
 from .node import Node
 from .mining_oracle import PoWMiningOracle  # , PoSMiningOracle
 from .network import Network
@@ -42,8 +43,8 @@ class Experiment:
         self._create_all_nodes()
 
         if run_config.mode == "pow":
-            self.__mining_oracle: Union[PoWMiningOracle,
-                                        PoSMiningOracle] = PoWMiningOracle(self.__env, self.__all_nodes)
+            self.__mining_oracle = PoWMiningOracle(
+                self.__env, self.__all_nodes)
         else:
             # self.__mining_oracle = PoSMiningOracle(self.__env,
             #                                        self.__all_nodes, run_config.pos_round_length, run_config.attacker_head_start)
@@ -58,21 +59,28 @@ class Experiment:
             for i in range(self.__config.attacker_head_start):
                 attacker.mine_block()
 
-        if self.__config.teasing_attacker:
-            attacker2 = TeasingPoWAttacker(self.__genesis,
-                                           self.__config.teasing_attacker,
-                                           self.__network)
+        if self.__config.private_attacker:
+            attacker2 = PrivateAttacker(
+                self.__genesis, self.__config.private_attacker, self.__network)
             self.__all_nodes.append(attacker2)
             for i in range(self.__config.attacker_head_start):
                 attacker2.mine_block()
 
-        if self.__config.equivocation_teasing_attacker:
-            attacker3 = EquivocationTeasingPoWAttacker(self.__genesis,
-                                                       self.__config.equivocation_teasing_attacker,
-                                                       self.__network)
+        if self.__config.teasing_attacker:
+            attacker3 = TeasingPoWAttacker(self.__genesis,
+                                           self.__config.teasing_attacker,
+                                           self.__network)
             self.__all_nodes.append(attacker3)
             for i in range(self.__config.attacker_head_start):
                 attacker3.mine_block()
+
+        if self.__config.equivocation_teasing_attacker:
+            attacker4 = EquivocationTeasingPoWAttacker(self.__genesis,
+                                                       self.__config.equivocation_teasing_attacker,
+                                                       self.__network)
+            self.__all_nodes.append(attacker4)
+            for i in range(self.__config.attacker_head_start):
+                attacker4.mine_block()
 
         if self.__config.download_rule == DownloadRules.LongestHeaderChain.value:
             def node_factory() -> Node:

@@ -41,6 +41,10 @@ def setup_parser() -> argparse.ArgumentParser:
                         help="include an attacker with the given mining power (defaults to no attacker)",
                         type=float, default=0)
 
+    parser.add_argument("--" + RunConfig.PRIVATE_ATTACKER, metavar="MINING_POWER",
+                        help="include a private (resetting) attacker with the given mining power (defaults to no attacker)",
+                        type=float, default=0)
+
     parser.add_argument("--" + RunConfig.TEASING_ATTACKER, metavar="MINING_POWER", type=float,
                         help="include a teasing attacker with the given mining power (defaults to no attacker)",
                         default=0)
