@@ -13,7 +13,7 @@ PYTHON_PATH = "python"
 BASE_DATA_PATH = os.path.join(BASE_PATH, "data/")
 DATA_SUB_PATH = "exp3_4"
 selected_files = ["exp_teaser_start_0_0.log",
-                  "exp_teaser_start_1_5.log",
+                  "exp_teaser_start_1_6.log",
                   "exp_teaser_start_2_0.log",
                   ]
 
@@ -76,7 +76,7 @@ def read_config_file(file_name: str) -> Dict[str, Any]:
         return config  # type: ignore
 
 
-MAX_TIME =1000
+MAX_TIME =500
 
 plot_data: List[Dict[str, Any]] = list()
 
