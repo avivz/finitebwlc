@@ -94,4 +94,4 @@ for command in tqdm.tqdm(commands_to_run):
 print(f"\n\nskipped: {skip_count}, ran: {len(commands_to_run)}.")
 
 # Sample run command:
-# python -m exp_teaser_start.run_exp3
+# python -m exp_teaser_start.run_exp
