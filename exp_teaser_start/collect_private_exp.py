@@ -11,7 +11,7 @@ import argparse
 BASE_PATH = os.path.split(os.path.abspath(__file__))[0]
 PYTHON_PATH = "python"
 BASE_DATA_PATH = os.path.join(BASE_PATH, "data/")
-DATA_SUB_PATH = "private_exp1"
+DATA_SUB_PATH = "private_exp3_4"
 selected_files = ["exp_private_start_0_0.log",
                   "exp_private_start_1_0.log",
                   "exp_private_start_2_0.log"
@@ -76,7 +76,7 @@ def read_config_file(file_name: str) -> Dict[str, Any]:
         return config  # type: ignore
 
 
-MAX_TIME = 500
+MAX_TIME = 1000
 
 plot_data: List[Dict[str, Any]] = list()
 
@@ -108,7 +108,7 @@ if not os.path.exists(os.path.join(BASE_OUT_PATH, DATA_SUB_PATH)):
 
 # Now save a csv file with the data into the results subdir
 print("Saving results...")
-with open(os.path.join(BASE_OUT_PATH, DATA_SUB_PATH, "fig-experiment-private-start-data.txt"), "w") as file:
+with open(os.path.join(BASE_OUT_PATH, DATA_SUB_PATH, "fig-experiment-private-start-data3.txt"), "w") as file:
     file.write("time,height_delta,beta\n")
     for sample in plot_data:
         file.write(

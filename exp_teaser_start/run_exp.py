@@ -22,7 +22,7 @@ def setup_parser() -> argparse.ArgumentParser:
 
 BASE_PATH = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 SIMULATION_MODULE = "sim.run_experiment"
-DATA_DIR = "exp2"
+DATA_DIR = "exp3_4"
 PYTHON_PATH = "python"
 
 DATA_ROOT_PATH = os.path.join(os.path.split(
@@ -37,9 +37,15 @@ DATA_PATH = os.path.join(DATA_ROOT_PATH, DATA_DIR)
 if not os.path.exists(DATA_PATH):
     os.mkdir(DATA_PATH)
 
-block_rate = 1/2
-bandwidth = 1
-attacker_rates = [0.45, 0.4, 0.35, 0.3]
+# Parameters:
+# 1: bw = 1.5, [0.68, 0.52, 0.36]
+# 2: bw = 1.5, [0.65, 0.50, 0.35]
+# 3: bw = 2, [0.72, 0.56, 0.44]
+# 3: bw = 2, [0.75, 0.6, 0.45]
+
+hon_block_rate = 1
+bandwidth = 2
+attacker_block_rates = [0.75, 0.6, 0.45]
 num_honest = 100
 num_repetitions = 10
 
@@ -51,15 +57,15 @@ skip_count = 0
 commands_to_run: List[str] = []
 
 for rep in range(num_repetitions):
-    for index, attacker_rate in enumerate(attacker_rates):
+    for index, attacker_rate in enumerate(attacker_block_rates):
         results_file_name = os.path.join(
             DATA_PATH, "exp_teaser_start_" + str(index)+"_"+str(rep)+".json")
         block_log_file_name = os.path.join(
             DATA_PATH, "exp_teaser_start_" + str(index)+"_"+str(rep)+".log")
 
         arguments = base_arguments + [f"--{sim.configuration.RunConfig.BANDWIDTH} {bandwidth}",
-                                      f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} {(1-attacker_rate)*block_rate/num_honest}",
-                                      f"--{sim.configuration.RunConfig.TEASING_ATTACKER} {attacker_rate*block_rate}",
+                                      f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} {hon_block_rate/num_honest}",
+                                      f"--{sim.configuration.RunConfig.TEASING_ATTACKER} {attacker_rate}",
                                       f"--{sim.configuration.RunConfig.SAVE_RESULTS} {results_file_name}",
                                       f"--{sim.configuration.RunConfig.LOG_BLOCKS} {block_log_file_name}",
                                       ]
@@ -88,4 +94,4 @@ for command in tqdm.tqdm(commands_to_run):
 print(f"\n\nskipped: {skip_count}, ran: {len(commands_to_run)}.")
 
 # Sample run command:
-# python -m exp_teaser_start.run_exp2
+# python -m exp_teaser_start.run_exp3
