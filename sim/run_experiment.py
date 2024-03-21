@@ -66,6 +66,9 @@ def setup_parser() -> argparse.ArgumentParser:
     parser.add_argument("--" + RunConfig.NUM_HONEST, default=10, required=True, type=int,
                         help="number of honest nodes")
 
+    parser.add_argument("--" + RunConfig.NUM_SPV, default=0, required=False, type=int,
+                        help="number of SPV mining nodes")
+
     parser.add_argument("--" + RunConfig.HONEST_BLOCK_RATE, default=0.1, required=True, type=float,
                         help="mining power of each honest node")
 

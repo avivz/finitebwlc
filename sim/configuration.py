@@ -22,6 +22,9 @@ class RunConfig:
     NUM_HONEST: ClassVar[str] = "num_honest"
     num_honest: int = 1
 
+    NUM_SPV: ClassVar[str] = "num_spv"
+    num_spv: int = 0
+
     HONEST_BLOCK_RATE: ClassVar[str] = "honest_block_rate"
     honest_block_rate: float = 1
 

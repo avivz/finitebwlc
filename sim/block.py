@@ -68,3 +68,8 @@ class Block:
 
     def __str__(self) -> str:
         return self.__description
+    
+    def __eq__(self, other: "Block") -> bool:
+        if self is None or other is None:
+            return False
+        return self.__id == other.id

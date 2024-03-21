@@ -8,6 +8,7 @@ import os
 
 from .honest_node_longest_header_chain import HonestNodeLongestHeaderChain
 from .honest_node_greedy_chain import HonestNodeGreedy
+from .spv_node import SPVNode
 from .dumb_attacker import DumbAttacker
 from .private_attacker import PrivateAttacker
 from .node import Node
@@ -37,6 +38,7 @@ class Experiment:
         self.__network = Network(self.__env, self.__download_log)
         self.__all_nodes: List[Node] = []
         self.__honest_nodes: List[Node]
+        self.__spv_nodes: List[Node] = []
 
         self.__genesis = Block(None, None, 0)
 
@@ -97,6 +99,10 @@ class Experiment:
         self.__honest_nodes = [node_factory()
                                for _ in range(self.__config.num_honest)]
         self.__all_nodes += self.__honest_nodes
+
+        self.__spv_nodes = [SPVNode(self.__genesis, self.__config.honest_block_rate, self.__config.bandwidth,
+                                 self.__config.header_delay, self.__network) for _ in range(self.__config.num_spv)]
+        self.__all_nodes += self.__spv_nodes
 
     def run_experiment(self, progress_bar: bool = True) -> None:
         """a basic experiment with 10 nodes mining together at a rate of 1 block per second"""
