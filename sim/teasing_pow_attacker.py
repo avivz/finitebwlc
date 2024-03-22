@@ -57,12 +57,17 @@ class TeasingPoWAttacker(Node):
         
         # A block is not safe to make available if any one of the chains that extend it is already fully available (perhaps mined by an SPV node) and is longer than the honest chain:
         def safe_to_make_available(candidate: Block) -> bool:
-            children = candidate.get_children()
-            for child in children:
-                if child.is_available:
-                    if child.height >= block.height or not safe_to_make_available(child):
-                        return False
-            return True 
+            stack = [candidate]
+            while stack:
+                current_block = stack.pop()
+                children = current_block.get_children()
+                for child in children:
+                    if child.is_available:
+                        if child.height >= block.height:
+                            return False
+                        else:
+                            stack.append(child)
+            return True
 
         # make blocks available up to the height of the honest chain:
         while block.height-1 > self._last_available.height:
