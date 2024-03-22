@@ -45,7 +45,7 @@ if not os.path.exists(DATA_PATH):
 if not args.num_spv:
     args.num_spv = [0]
 
-base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100", 
+base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100",
                   f"--{sim.configuration.RunConfig.MODE} pow", f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
 
 bandwidth_range = numpy.arange(0.1, 2.001, 0.05)
@@ -64,13 +64,16 @@ for rep in range(num_repetitions):
             DATA_PATH, "exp2_band_" + str(index)+"_"+str(rep)+".json")
         arguments1 = base_arguments + \
             [f"--{sim.configuration.RunConfig.BANDWIDTH} {bandwidth}",
-                f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name1}"]
+             f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name1}"]
 
         file_name2 = os.path.join(
             DATA_PATH, "exp2_teaser_" + str(index)+"_"+str(rep)+".json")
-        arguments2 = arguments1 + \
-            [f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name2}",
-                f"--{sim.configuration.RunConfig.TEASING_ATTACKER} 1.0", f"--{sim.configuration.RunConfig.ATTACKER_HEAD_START} 100", f"--{sim.configuration.RunConfig.NUM_SPV} {args.num_spv[0]}"]
+        arguments2 = base_arguments + \
+            [f"--{sim.configuration.RunConfig.BANDWIDTH} {bandwidth}",
+             f"--{sim.configuration.RunConfig.SAVE_RESULTS} {file_name2}",
+             f"--{sim.configuration.RunConfig.TEASING_ATTACKER} 1.0",
+             f"--{sim.configuration.RunConfig.ATTACKER_HEAD_START} 100",
+             f"--{sim.configuration.RunConfig.NUM_SPV} {args.num_spv[0]}"]
 
         cmd1 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments1)}"
         cmd2 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments2)}"
