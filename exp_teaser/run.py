@@ -78,11 +78,13 @@ for rep in range(num_repetitions):
         cmd1 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments1)}"
         cmd2 = f"{PYTHON_PATH} -m {SIMULATION_MODULE} {' '.join(arguments2)}"
 
-        if os.path.exists(file_name1) and os.path.getsize(file_name1) > 0:
-            print(f"SKIPPING {file_name1}")
-            num_skipped += 1
-        else:
-            commands_to_run.append(cmd1)
+        # If you run the experiment once with 0 SPV nodes, no need to run the case with no attacker again because it does not have SPV nodes anyway.
+        if args.num_spv[0] == 0:
+            if os.path.exists(file_name1) and os.path.getsize(file_name1) > 0:
+                print(f"SKIPPING {file_name1}")
+                num_skipped += 1
+            else:
+                commands_to_run.append(cmd1)
         if os.path.exists(file_name2) and os.path.getsize(file_name2) > 0:
             print(f"SKIPPING {file_name2}")
             num_skipped += 1
