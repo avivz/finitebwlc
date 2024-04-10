@@ -45,7 +45,7 @@ if not os.path.exists(DATA_PATH):
 if not args.num_spv:
     args.num_spv = [0]
 
-base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 10000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100",
+base_arguments = [f"--{sim.configuration.RunConfig.RUN_TIME} 1000", f"--{sim.configuration.RunConfig.NUM_HONEST} 100",
                   f"--{sim.configuration.RunConfig.MODE} pow", f"--{sim.configuration.RunConfig.HONEST_BLOCK_RATE} 0.01", f"--{sim.configuration.RunConfig.HEADER_DELAY} 0"]
 
 bandwidth_range = numpy.arange(0.1, 2.001, 0.05)

@@ -44,7 +44,7 @@ class TeasingPoWAttacker(Node):
                 self._spv_tip = block
             return
 
-        # Here the attacker will want to give up (if its tim is behind the honest chain):
+        # Here the attacker will want to give up (if its tip is behind the honest chain):
         if block.height > self._tip.height:
             self._tip = block
             self._mining_target = block
@@ -55,7 +55,7 @@ class TeasingPoWAttacker(Node):
         self._mining_target = self._tip
 
         
-        # A block is not safe to make available if any one of the chains that extend it is already fully available (perhaps mined by an SPV node) and is longer than the honest chain:
+        # A block is not safe to make available if any one of the chains that extend it is already fully available (perhaps mined by an SPV node) and is longer than the honest chain. Such a block is not safe to make available because it would cause honest nodes to download a chain that is longer than the honest chain, and thus the attack would fail.
         def safe_to_make_available(candidate: Block) -> bool:
             stack = [candidate]
             while stack:
@@ -80,6 +80,7 @@ class TeasingPoWAttacker(Node):
             self._last_available.is_available = True
             if self._next_available.get_children():
                 # set the next available block to be the first child of the next available block that is not available:
+                # there should not be multiple candidates for the next available block because the adversary would not fork its chain. So it's enough to just chose the first candidate.
                 self._next_available = next((child for child in self._next_available.get_children() if not child.is_available), None)
 
         if self._next_available and self._next_available.get_children():
